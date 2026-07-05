@@ -1,0 +1,425 @@
+import datetime
+import json
+import logging
+import os
+import uuid
+from enum import Enum
+from typing import Any
+
+# DO NOT import Google API libraries at module level!
+# These imports initialize gRPC state before Celery fork, causing SIGSEGV.
+# Import them INSIDE methods where they're used (after fork).
+from unstract.connectors.constants import DatabaseTypeConstants
+from unstract.connectors.databases.exceptions import (
+    BigQueryForbiddenException,
+    BigQueryNotFoundException,
+    ColumnMissingException,
+)
+from unstract.connectors.databases.sql_safety import (
+    QuoteStyle,
+    safe_identifier,
+    validate_identifier,
+)
+from unstract.connectors.databases.unstract_db import UnstractDB
+from unstract.connectors.exceptions import ConnectorError
+
+logger = logging.getLogger(__name__)
+
+# BigQuery table format 'database.schema.table' splits into an array of size 3
+BIG_QUERY_TABLE_SIZE = 3
+
+
+class BigQuery(UnstractDB):
+    def __init__(self, settings: dict[str, Any]):
+        super().__init__("BigQuery")
+        from google.cloud import bigquery
+
+        self.bigquery = bigquery
+        self.json_credentials = json.loads(settings.get("json_credentials", "{}"))
+        self.big_query_table_size = BIG_QUERY_TABLE_SIZE
+
+    @staticmethod
+    def get_id() -> str:
+        return "bigquery|79e1d681-9b8b-4f6b-b972-1a6a095312f4"
+
+    @staticmethod
+    def get_name() -> str:
+        return "BigQuery"
+
+    @staticmethod
+    def get_description() -> str:
+        return "BigQuery Database"
+
+    @staticmethod
+    def get_icon() -> str:
+        return "/icons/connector-icons/Bigquery.png"
+
+    @staticmethod
+    def get_doc_url() -> str:
+        return "https://docs.unstract.com/unstract/unstract_platform/connectors/databases/bigquery_database/"
+
+    @staticmethod
+    def get_json_schema() -> str:
+        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
+        schema = f.read()
+        f.close()
+        return schema
+
+    @staticmethod
+    def can_write() -> bool:
+        return True
+
+    @staticmethod
+    def can_read() -> bool:
+        return True
+
+    def get_quote_style(self) -> QuoteStyle:
+        return QuoteStyle.BACKTICK
+
+    @staticmethod
+    def _sanitize_for_bigquery(data: Any) -> Any:
+        """BigQuery-specific float sanitization for PARSE_JSON compatibility.
+
+        BigQuery's PARSE_JSON() requires floats that can "round-trip" through
+        string representation. This method limits total significant figures to 15
+        (IEEE 754 double precision safe zone) to ensure clean binary representation.
+
+        Args:
+            data: The data structure to sanitize (dict, list, or primitive)
+
+        Returns:
+            Sanitized data compatible with BigQuery's PARSE_JSON
+
+        Example:
+            >>> BigQuery._sanitize_for_bigquery({"time": 1760509016.282637})
+            {'time': 1760509016.28264}  # Limited to 15 significant figures
+
+            >>> BigQuery._sanitize_for_bigquery({"cost": 0.001228})
+            {'cost': 0.001228}  # Unchanged (only 4 significant figures)
+        """
+        import math
+
+        if isinstance(data, float):
+            # Handle special values that BigQuery can't store in JSON
+            if math.isnan(data) or math.isinf(data):
+                return None
+            if data == 0:
+                return 0.0
+
+            # Limit total significant figures to 15 for IEEE 754 compatibility
+            # BigQuery PARSE_JSON requires values that round-trip cleanly
+            # For large numbers (like Unix timestamps), this reduces decimal precision
+            # For small numbers (like costs), full precision is preserved
+            magnitude = math.floor(math.log10(abs(data))) + 1
+            safe_decimals = max(0, 15 - magnitude)
+            return float(f"{data:.{safe_decimals}f}")
+
+        elif isinstance(data, dict):
+            return {k: BigQuery._sanitize_for_bigquery(v) for k, v in data.items()}
+        elif isinstance(data, list):
+            return [BigQuery._sanitize_for_bigquery(item) for item in data]
+        else:
+            return data
+
+    def get_engine(self) -> Any:
+        return self.bigquery.Client.from_service_account_info(  # type: ignore
+            info=self.json_credentials
+        )
+
+    def execute(self, query: str, params: Any = None) -> Any:
+        try:
+            query_job = self.get_engine().query(query)
+            return query_job.result()
+        except Exception as e:
+            raise ConnectorError(str(e))
+
+    def sql_to_db_mapping(self, value: Any, column_name: str | None = None) -> str:
+        """Gets the python datatype of value and converts python datatype to
+        corresponding DB datatype.
+
+        Args:
+            value (str): python datatype
+            column_name (str | None): name of the column being mapped
+
+        Returns:
+            str: database columntype
+        """
+        data_type = type(value)
+
+        if data_type in (dict, list):
+            if column_name and column_name.endswith("_v2"):
+                return str(DatabaseTypeConstants.BIGQUERY_JSON)
+            else:
+                return str(DatabaseTypeConstants.BIGQUERY_STRING)
+
+        mapping = {
+            str: DatabaseTypeConstants.BIGQUERY_STRING,
+            int: DatabaseTypeConstants.BIGQUERY_INT64,
+            float: DatabaseTypeConstants.BIGQUERY_FLOAT64,
+            datetime.datetime: DatabaseTypeConstants.BIGQUERY_TIMESTAMP,
+        }
+        return str(mapping.get(data_type, DatabaseTypeConstants.BIGQUERY_STRING))
+
+    def get_create_table_base_query(self, table: str) -> str:
+        """Function to create a base create table sql query.
+
+        Args:
+            table (str): db-connector table name
+            Format  {project}.{dataset}.{table}
+
+        Returns:
+            str: generates a create sql base query with the constant columns
+        """
+        bigquery_table_parts = table.split(".")
+        if len(bigquery_table_parts) != self.big_query_table_size:
+            raise ValueError(
+                f"Invalid table name format: '{table}'. "
+                "Please ensure the BigQuery table is in the form of "
+                "{project}.{dataset}.{table}."
+            )
+        qt = safe_identifier(table, QuoteStyle.BACKTICK, allow_dots=True)
+        sql_query = (
+            f"CREATE TABLE IF NOT EXISTS {qt} "
+            f"(id STRING,"
+            f"created_by STRING, created_at TIMESTAMP, "
+            f"metadata JSON, "
+            f"user_field_1 BOOL DEFAULT FALSE, "
+            f"user_field_2 INT64 DEFAULT 0, "
+            f"user_field_3 STRING DEFAULT NULL, "
+            f"status STRING, "
+            f"error_message STRING, "
+        )
+        return sql_query
+
+    def prepare_multi_column_migration(self, table_name: str, column_name: str) -> str:
+        qt = safe_identifier(table_name, QuoteStyle.BACKTICK, allow_dots=True)
+        qc = safe_identifier(f"{column_name}_v2", QuoteStyle.BACKTICK)
+        sql_query = (
+            f"ALTER TABLE {qt} "
+            f"ADD COLUMN {qc} JSON, "
+            f"ADD COLUMN metadata JSON, "
+            f"ADD COLUMN user_field_1 BOOL, "
+            f"ADD COLUMN user_field_2 INT64, "
+            f"ADD COLUMN user_field_3 STRING, "
+            f"ADD COLUMN status STRING, "
+            f"ADD COLUMN error_message STRING"
+        )
+        return sql_query
+
+    def get_sql_insert_query(
+        self, table_name: str, sql_keys: list[str], sql_values: list[str] | None = None
+    ) -> str:
+        """Function to generate parameterised insert sql query.
+
+        Args:
+            table_name (str): db-connector table name
+            sql_keys (list[str]): column names
+            sql_values (list[str], optional): SQL values for database-specific handling
+
+        Returns:
+            str: returns a string with parameterised insert sql query
+        """
+        qt = safe_identifier(table_name, QuoteStyle.BACKTICK, allow_dots=True)
+        # BigQuery uses @ parameterization, ignore sql_values for now
+        # Escape column names with backticks to handle special characters like underscores
+        escaped_keys = [safe_identifier(key, QuoteStyle.BACKTICK) for key in sql_keys]
+        keys_str = ",".join(escaped_keys)
+
+        # safe_identifier above already validates each key
+        escaped_params = [f"@`{key}`" for key in sql_keys]
+        values_placeholder = ",".join(escaped_params)
+        return f"INSERT INTO {qt} ({keys_str}) VALUES ({values_placeholder})"
+
+    def execute_query(
+        self, engine: Any, sql_query: str, sql_values: Any, **kwargs: Any
+    ) -> None:
+        """Executes create/insert query.
+
+        Args:
+            engine (Any): big query client engine
+            sql_query (str): sql create table/insert into table query
+            sql_values (Any): sql data to be insertted
+
+        Raises:
+            BigQueryForbiddenException: raised due to insufficient permission
+            BigQueryNotFoundException: raised due to unavailable resource
+            ColumnMissingException: raised due to missing columns in table query
+        """
+        # Import INSIDE method to avoid module-level gRPC initialization
+        import google.api_core.exceptions
+
+        table_name = kwargs.get("table_name", None)
+        if table_name is None:
+            raise ValueError("Please enter a valid table_name to to create/insert table")
+
+        sql_keys = list(kwargs.get("sql_keys", []))
+        column_types = self.get_information_schema(table_name=table_name)
+
+        try:
+            if sql_values:
+                query_parameters = []
+                # Modify SQL query to use PARSE_JSON for JSON columns
+                modified_sql = sql_query
+
+                for key, value in zip(sql_keys, sql_values, strict=False):
+                    column_type = column_types.get(key.lower(), "").upper()
+
+                    if isinstance(value, (dict, list)) and column_type == "JSON":
+                        # For JSON objects in JSON columns, convert to string and use PARSE_JSON
+                        # Sanitize floats before serialization to ensure clean JSON for PARSE_JSON
+                        sanitized_value = BigQuery._sanitize_for_bigquery(value)
+                        json_str = (
+                            json.dumps(sanitized_value)
+                            if sanitized_value is not None
+                            else None
+                        )
+                        if json_str:
+                            # Replace @`key` with PARSE_JSON(@`key`) in the SQL query
+                            modified_sql = modified_sql.replace(
+                                f"@`{key}`", f"PARSE_JSON(@`{key}`)"
+                            )
+                        query_parameters.append(
+                            self.bigquery.ScalarQueryParameter(key, "STRING", json_str)
+                        )
+                    elif isinstance(value, (dict, list)):
+                        # For dict/list values in STRING columns, serialize to JSON string
+                        # Sanitize floats before serialization to ensure clean JSON
+                        sanitized_value = BigQuery._sanitize_for_bigquery(value)
+                        json_str = (
+                            json.dumps(sanitized_value)
+                            if sanitized_value is not None
+                            else None
+                        )
+                        query_parameters.append(
+                            self.bigquery.ScalarQueryParameter(key, "STRING", json_str)
+                        )
+                    else:
+                        # For other values, use STRING as before
+                        query_parameters.append(
+                            self.bigquery.ScalarQueryParameter(key, "STRING", value)
+                        )
+
+                query_params = self.bigquery.QueryJobConfig(
+                    query_parameters=query_parameters
+                )
+                query_job = engine.query(modified_sql, job_config=query_params)
+            else:
+                query_job = engine.query(sql_query)
+            query_job.result()
+        except google.api_core.exceptions.Forbidden as e:
+            logger.error(f"Forbidden exception in creating/inserting data: {str(e)}")
+            raise BigQueryForbiddenException(
+                detail=e.message,
+                table_name=table_name,
+            ) from e
+        except google.api_core.exceptions.NotFound as e:
+            logger.error(f"Resource not found in creating/inserting table: {str(e)}")
+            raise BigQueryNotFoundException(
+                detail=e.message, table_name=table_name
+            ) from e
+        except google.api_core.exceptions.BadRequest as e:
+            logger.error(f"Column missing in inserting data: {str(e)}")
+            db, schema, table = table_name.split(".")
+            raise ColumnMissingException(
+                detail=e.message,
+                database=db,
+                schema=schema,
+                table_name=table,
+            ) from e
+
+    def get_information_schema(self, table_name: str) -> dict[str, str]:
+        """Function to generate information schema of the big query table.
+
+        Args:
+            table_name (str): db-connector table name
+                              Format  {database}.{schema}.{table}
+
+        Returns:
+            dict[str, str]: a dictionary contains db column name and
+            db column types of corresponding table
+        """
+        # Split table name but preserve case for table name part
+        bigquery_table_parts = table_name.split(".")
+        if len(bigquery_table_parts) != self.big_query_table_size:
+            raise ValueError(
+                f"Invalid table name format: '{table_name}'. "
+                "Please ensure the BigQuery table is in the form of "
+                "{project}.{dataset}.{table}."
+            )
+        # Convert project to lowercase
+        project = bigquery_table_parts[0].lower()
+        dataset = bigquery_table_parts[1]
+        table = bigquery_table_parts[2]
+        # Validate identifier parts to prevent injection in schema path
+        validate_identifier(project)
+        validate_identifier(dataset)
+        validate_identifier(table)
+        query = (
+            "SELECT column_name, data_type FROM "
+            f"`{project}`.`{dataset}`.INFORMATION_SCHEMA.COLUMNS WHERE "
+            "table_name = @table_name"
+        )
+        from google.cloud import bigquery as bq_module
+
+        job_config = bq_module.QueryJobConfig(
+            query_parameters=[
+                bq_module.ScalarQueryParameter("table_name", "STRING", table)
+            ]
+        )
+        try:
+            query_job = self.get_engine().query(query, job_config=job_config)
+            results = query_job.result()
+        except Exception as e:
+            raise ConnectorError(str(e))
+
+        # If table doesn't exist, execute returns None
+        if results is None:
+            logger.info(f"Table {table_name} does not exist, returning empty schema")
+            return {}
+
+        # Process the schema results
+        column_types: dict[str, str] = self.get_db_column_types(
+            columns_with_types=results
+        )
+        return column_types
+
+    def get_sql_values_for_query(
+        self, values: dict[str, Any], column_types: dict[str, str]
+    ) -> dict[str, str]:
+        """Prepare SQL values for BigQuery queries with JSON column support.
+
+        Args:
+            values (dict[str, Any]): dictionary of columns and values
+            column_types (dict[str, str]): types of columns from database schema
+
+        Returns:
+            dict[str, str]: Dictionary of column names to SQL values for parameterized queries
+        """
+        sql_values: dict[str, Any] = {}
+        for column in values:
+            value = values[column]
+            if isinstance(value, (dict, list)):
+                # For BigQuery, keep dict/list objects as-is for JSON columns
+                sql_values[column] = value
+            elif isinstance(value, str):
+                # Try to parse JSON strings back to objects for BigQuery
+                try:
+                    parsed_value = json.loads(value)
+                    # Sanitize floats after parsing to prevent precision issues
+                    # json.loads() creates new float objects that may have binary precision problems
+                    sanitized_value = BigQuery._sanitize_for_bigquery(parsed_value)
+                    sql_values[column] = sanitized_value
+                except (TypeError, ValueError, json.JSONDecodeError):
+                    # Not a JSON string, keep as string
+                    sql_values[column] = f"{value}"
+            elif isinstance(value, Enum):
+                sql_values[column] = value.value
+            else:
+                sql_values[column] = f"{value}"
+
+        # If table has a column 'id', unstract inserts a unique value to it
+        if any(key in column_types for key in ["id", "ID"]):
+            uuid_id = str(uuid.uuid4())
+            sql_values["id"] = f"{uuid_id}"
+
+        return sql_values

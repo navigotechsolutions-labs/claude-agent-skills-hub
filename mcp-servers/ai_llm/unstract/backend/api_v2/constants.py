@@ -1,0 +1,16 @@
+class ApiExecution:
+    PATH: str = "deployment/api"
+    MAXIMUM_TIMEOUT_IN_SEC: int = 300  # 5 minutes
+    FILES_FORM_DATA: str = "files"
+    TIMEOUT_FORM_DATA: str = "timeout"
+    INCLUDE_METADATA: str = "include_metadata"
+    INCLUDE_METRICS: str = "include_metrics"
+    INCLUDE_EXTRACTED_TEXT: str = "include_extracted_text"
+    USE_FILE_HISTORY: str = "use_file_history"  # Undocumented parameter
+    EXECUTION_ID: str = "execution_id"
+    TAGS: str = "tags"
+    LLM_PROFILE_ID: str = "llm_profile_id"
+    HITL_QUEUE_NAME: str = "hitl_queue_name"
+    HITL_PACKET_ID: str = "hitl_packet_id"
+    PRESIGNED_URLS: str = "presigned_urls"
+    CUSTOM_DATA: str = "custom_data"

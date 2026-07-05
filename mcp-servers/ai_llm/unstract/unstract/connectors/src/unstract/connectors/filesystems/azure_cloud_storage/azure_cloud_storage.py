@@ -1,0 +1,234 @@
+import logging
+import os
+from datetime import UTC, datetime
+from email.utils import parsedate_to_datetime
+from typing import Any
+
+import azure.core.exceptions as AzureException
+from fsspec import AbstractFileSystem
+
+from unstract.connectors.exceptions import AzureHttpError
+from unstract.connectors.filesystems.azure_cloud_storage.exceptions import (
+    parse_azure_error,
+)
+from unstract.connectors.filesystems.unstract_file_system import UnstractFileSystem
+from unstract.filesystem import FileStorageType, FileSystem
+
+# Suppress verbose Azure SDK HTTP request/response logging
+logging.getLogger("azurefs").setLevel(logging.ERROR)
+logging.getLogger("azure.core.pipeline.policies.http_logging_policy").setLevel(
+    logging.WARNING
+)
+logging.getLogger("azure.storage.blob").setLevel(logging.WARNING)
+logging.getLogger("azure.storage").setLevel(logging.WARNING)
+logging.getLogger("azure.core").setLevel(logging.WARNING)
+# Keep ADLFS filesystem errors visible but suppress HTTP noise
+logging.getLogger("adlfs").setLevel(logging.WARNING)
+
+logger = logging.getLogger(__name__)
+
+
+class AzureCloudStorageFS(UnstractFileSystem):
+    class AzureFsError:
+        INVALID_PATH = "The specifed resource name contains invalid characters."
+
+    def __init__(self, settings: dict[str, Any]):
+        from adlfs import AzureBlobFileSystem
+
+        super().__init__("AzureCloudStorageFS")
+        account_name = settings.get("account_name", "")
+        access_key = settings.get("access_key", "")
+        self.bucket = settings.get("bucket", "")
+        # adlfs._ls_containers() unconditionally reads from DirCache after
+        # populating it — use_listings_cache=False makes the write a no-op,
+        # causing a KeyError. listings_expiry_time=0 also breaks because
+        # DirCache expires entries between the write and immediate read
+        # (even nanoseconds trigger expiry). Use 1s as the minimum safe value.
+        # Check https://github.com/fsspec/adlfs/issues/230 for more context.
+        self.azure_fs = AzureBlobFileSystem(
+            account_name=account_name,
+            credential=access_key,
+            listings_expiry_time=1,
+        )
+
+    @staticmethod
+    def get_id() -> str:
+        return "azure_cloud_storage|1476a54a-ed17-4a01-9f8f-cb7e4cf91c8a"
+
+    @staticmethod
+    def get_name() -> str:
+        return "Azure Cloud Storage"
+
+    @staticmethod
+    def get_description() -> str:
+        return "Access files in your Azure Cloud Storage"
+
+    @staticmethod
+    def get_icon() -> str:
+        return "/icons/connector-icons/azure_blob_storage.png"
+
+    @staticmethod
+    def get_doc_url() -> str:
+        return "https://docs.unstract.com/unstract/unstract_platform/connectors/filesystems/azure_cloud_storage/"
+
+    @staticmethod
+    def get_json_schema() -> str:
+        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
+        schema = f.read()
+        f.close()
+        return schema
+
+    @staticmethod
+    def requires_oauth() -> bool:
+        return False
+
+    @staticmethod
+    def python_social_auth_backend() -> str:
+        return ""
+
+    @staticmethod
+    def can_write() -> bool:
+        return True
+
+    @staticmethod
+    def can_read() -> bool:
+        return True
+
+    def get_fsspec_fs(self) -> AbstractFileSystem:
+        return self.azure_fs
+
+    def extract_metadata_file_hash(self, metadata: dict[str, Any]) -> str | None:
+        """Extracts a unique file hash from metadata.
+
+        Args:
+            metadata (dict): Metadata dictionary obtained from fsspec.
+
+        Returns:
+            Optional[str]: The file hash in hexadecimal format or None if not found.
+        """
+        # Extracts content_md5 (Bytearray) for Azure Blob Storage
+        content_md5 = metadata.get("content_settings", {}).get("content_md5")
+        if content_md5:
+            return content_md5.hex()
+        logger.error(
+            f"[Azure Blob Storage] File hash not found for the metadata: {metadata}"
+        )
+        return None
+
+    def is_dir_by_metadata(self, metadata: dict[str, Any]) -> bool:
+        """Check if the given path is a directory.
+
+        Args:
+            metadata (dict): Metadata dictionary obtained from fsspec or cloud API.
+
+        Returns:
+            bool: True if the path is a directory, False otherwise.
+        """
+        inner_metadata = metadata.get("metadata")
+        if not isinstance(inner_metadata, dict):
+            inner_metadata = {}
+
+        is_dir = inner_metadata.get("is_directory") == "true"
+        if not is_dir:
+            is_dir = metadata.get("type") == "directory"
+        return is_dir
+
+    def extract_modified_date(self, metadata: dict[str, Any]) -> datetime | None:
+        """Extract the last modified date from Azure metadata.
+
+        Accepts both ISO-8601 and RFC 1123 strings, normalizes all returned
+        datetimes to timezone-aware UTC.
+
+        Args:
+            metadata: File metadata dictionary from fsspec
+
+        Returns:
+            timezone-aware UTC datetime object or None if not available
+        """
+        last_modified = metadata.get("last_modified")
+
+        if isinstance(last_modified, datetime):
+            # Ensure datetime has timezone info
+            if last_modified.tzinfo is None:
+                # Naive datetime - assume UTC
+                return last_modified.replace(tzinfo=UTC)
+            else:
+                # Convert to UTC
+                return last_modified.astimezone(UTC)
+
+        elif isinstance(last_modified, str):
+            # Try ISO-8601 format first
+            try:
+                dt = datetime.fromisoformat(last_modified.replace("Z", "+00:00"))
+                # Ensure timezone awareness and convert to UTC
+                if dt.tzinfo is None:
+                    return dt.replace(tzinfo=UTC)
+                else:
+                    return dt.astimezone(UTC)
+            except ValueError:
+                pass
+
+            # Fall back to RFC 1123 format
+            try:
+                dt = parsedate_to_datetime(last_modified)
+                # parsedate_to_datetime returns timezone-aware datetime in UTC
+                return dt.astimezone(UTC)
+            except (ValueError, TypeError):
+                logger.warning(
+                    f"[Azure] Failed to parse datetime '{last_modified}' from metadata keys: {list(metadata.keys())}"
+                )
+                return None
+
+        logger.debug(
+            f"[Azure] No modified date found in metadata keys: {list(metadata.keys())}"
+        )
+        return None
+
+    def test_credentials(self) -> bool:
+        """To test credentials for Azure Cloud Storage."""
+        try:
+            self.get_fsspec_fs().info(self.bucket)
+        except Exception as e:
+            logger.error(
+                f"Error from Azure Cloud Storage while testing connection: {str(e)}"
+            )
+            err = parse_azure_error(e)
+            raise err from e
+        return True
+
+    def upload_file_to_storage(self, source_path: str, destination_path: str) -> None:
+        """Method to upload filepath from tool to destination connector
+        directory.
+
+        Args:
+            source_path (str): source file path from tool
+            destination_path (str): destination azure directory file path
+
+        Raises:
+            AzureHttpError: returns error for invalid directory
+        """
+        normalized_path = os.path.normpath(destination_path)
+        destination_connector_fs = self.get_fsspec_fs()
+        try:
+            file_system = FileSystem(FileStorageType.WORKFLOW_EXECUTION)
+            workflow_fs = file_system.get_file_storage()
+            data = workflow_fs.read(path=source_path, mode="rb")
+            destination_connector_fs.write_bytes(normalized_path, data)
+        except AzureException.HttpResponseError as e:
+            self.raise_http_exception(e=e, path=normalized_path)
+
+    def raise_http_exception(
+        self, e: AzureException.HttpResponseError, path: str
+    ) -> AzureHttpError:
+        user_message = f"Error from Azure Cloud Storage connector. {e.reason} "
+        if hasattr(e, "reason"):
+            error_reason = e.reason
+            if error_reason == self.AzureFsError.INVALID_PATH:
+                user_message = (
+                    f"Error from Azure Cloud Storage connector. "
+                    f"Invalid resource name for path '{path}'. {e.reason}"
+                )
+        raise AzureHttpError(
+            user_message,
+            treat_as_user_message=True,
+        ) from e

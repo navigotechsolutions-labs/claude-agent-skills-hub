@@ -1,0 +1,259 @@
+import { useParams } from "react-router-dom";
+
+import { useCustomToolStore } from "../store/custom-tool-store";
+import { usePromptOutputStore } from "../store/prompt-output-store";
+import { useSessionStore } from "../store/session-store";
+import { useTokenUsageStore } from "../store/token-usage-store";
+import { useAxiosPrivate } from "./useAxiosPrivate";
+
+let promptOutputApiSps;
+try {
+  const mod = await import("../plugins/simple-prompt-studio/helper");
+  promptOutputApiSps = mod.promptOutputApiSps;
+} catch {
+  // The component will remain null of it is not available
+}
+let publicOutputsApi;
+try {
+  const mod = await import(
+    "../plugins/prompt-studio-public-share/helpers/PublicShareAPIs"
+  );
+  publicOutputsApi = mod.publicOutputsApi;
+} catch {
+  // The component will remain null of it is not available
+}
+
+let handleLookupOutput;
+try {
+  const mod = await import(
+    "../plugins/lookup-studio/prompt-card/handleLookupOutput"
+  );
+  handleLookupOutput = mod.handleLookupOutput;
+} catch (error) {
+  // Surface chunk-load failures — silent catch hid them.
+  // eslint-disable-next-line no-console
+  console.warn("[usePromptOutput] handleLookupOutput unavailable:", error);
+}
+
+// Cloud-only extractor; OSS no-op. Signature matches plugin helper.
+let getEnrichmentFromItem = (_item) => null;
+try {
+  const mod = await import("../plugins/lookup-enriched-toggle/helpers");
+  getEnrichmentFromItem = mod.getEnrichmentFromItem;
+} catch (error) {
+  // eslint-disable-next-line no-console
+  console.warn("[usePromptOutput] getEnrichmentFromItem unavailable:", error);
+}
+
+const usePromptOutput = () => {
+  const { sessionDetails } = useSessionStore();
+  const { setTokenUsage, updateTokenUsage } = useTokenUsageStore();
+  const { setPromptOutput, updatePromptOutput } = usePromptOutputStore();
+  const { isSimplePromptStudio, isPublicSource } = useCustomToolStore();
+  const axiosPrivate = useAxiosPrivate();
+  const { id } = useParams();
+
+  const generatePromptOutputKey = (
+    promptId,
+    docId,
+    llmProfile,
+    isSinglePass,
+    isIncludeSinglePass = true,
+  ) => {
+    let key = `${promptId}__${docId}__${llmProfile}`;
+
+    if (isIncludeSinglePass) {
+      key += `__${isSinglePass}`;
+    }
+    return key;
+  };
+
+  const generatePromptOutputKeyForSinglePass = (llmProfile, docId) => {
+    return `single_pass__${llmProfile}__${docId}`;
+  };
+
+  const generatePromptOutputKeyForContext = (llmProfile, docId) => {
+    return `single_pass__${llmProfile}__${docId}__context`;
+  };
+
+  const generatePromptOutputKeyForChallenge = (llmProfile, docId) => {
+    return `single_pass__${llmProfile}__${docId}__challenge_data`;
+  };
+
+  const getUrl = (toolId, docId, promptId, llmProfile, isSinglePassExtract) => {
+    let url = `/api/v1/unstract/${sessionDetails?.orgId}/prompt-studio/prompt-output/?tool_id=${toolId}`;
+
+    if (isSimplePromptStudio) {
+      url = promptOutputApiSps(toolId, null, null);
+    }
+
+    if (isPublicSource) {
+      url = publicOutputsApi(id, promptId, isSinglePassExtract, null, null);
+    }
+
+    if (docId) {
+      url += `&document_manager=${docId}`;
+    }
+
+    if (promptId) {
+      url += `&prompt_id=${promptId}`;
+    }
+
+    if (llmProfile) {
+      url += `&profile_manager=${llmProfile}`;
+    }
+
+    if (isSinglePassExtract) {
+      url += `&is_single_pass_extract=${isSinglePassExtract}`;
+    }
+
+    return url;
+  };
+
+  const updatePromptOutputState = (data, isReset, timer = 0) => {
+    const outputs = {};
+
+    let isTokenUsageForSinglePassAdded = false;
+    const tokenUsageDetails = {};
+    data.forEach((item) => {
+      const promptId = item?.prompt_id;
+      const docId = item?.document_manager;
+      const llmProfile = item?.profile_manager;
+      const isSinglePass = item?.is_single_pass_extract;
+
+      if (!promptId || !docId || !llmProfile) {
+        return;
+      }
+
+      const key = generatePromptOutputKey(
+        promptId,
+        docId,
+        llmProfile,
+        isSinglePass,
+        true,
+      );
+      outputs[key] = {
+        runId: item?.run_id,
+        promptOutputId: item?.prompt_output_id,
+        profileManager: llmProfile,
+        context: item?.context,
+        challengeData: item?.challenge_data,
+        tokenUsage: item?.token_usage,
+        output: item?.output,
+        timer,
+        coverage: item?.coverage,
+        highlightData: item?.highlight_data,
+        confidenceData: item?.confidence_data,
+        wordConfidenceData: item?.word_confidence_data,
+      };
+
+      // Per-item plugin failure must not abort the forEach — would leave
+      // partial state with no error surfaced.
+      try {
+        const enrichment = getEnrichmentFromItem(item);
+        if (handleLookupOutput && enrichment) {
+          handleLookupOutput(item.prompt_output_id, enrichment);
+        }
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.warn("[usePromptOutput] lookup enrichment failed:", err);
+      }
+
+      if (item?.is_single_pass_extract && isTokenUsageForSinglePassAdded) {
+        return;
+      }
+
+      if (item?.is_single_pass_extract) {
+        const tokenUsageId = generatePromptOutputKeyForSinglePass(
+          llmProfile,
+          docId,
+        );
+        tokenUsageDetails[tokenUsageId] = item?.token_usage;
+        tokenUsageDetails[
+          generatePromptOutputKeyForContext(llmProfile, docId)
+        ] = item?.context;
+        tokenUsageDetails[
+          generatePromptOutputKeyForChallenge(llmProfile, docId)
+        ] = item?.challenge_data;
+        isTokenUsageForSinglePassAdded = true;
+        return;
+      }
+
+      const tokenUsageId = generatePromptOutputKey(
+        promptId,
+        docId,
+        llmProfile,
+        false,
+        false,
+      );
+      tokenUsageDetails[tokenUsageId] = item?.token_usage;
+    });
+    if (isReset) {
+      setPromptOutput(outputs);
+      setTokenUsage(tokenUsageDetails);
+    } else {
+      const prevOutputs = usePromptOutputStore.getState().promptOutputs;
+      updatePromptOutput(updateCoverage(prevOutputs, outputs));
+      updateTokenUsage(tokenUsageDetails);
+    }
+  };
+
+  const updateCoverage = (promptOutputs, outputs) => {
+    const currentSelectedDoc = useCustomToolStore.getState().selectedDoc;
+    let updatedPromptOutputs = promptOutputs;
+    Object.keys(outputs).forEach((key) => {
+      const [keyPromptId, keyDoctId, , keyIsSinglePass] = key.split("__");
+      // only add output of selected document
+      if (keyDoctId === currentSelectedDoc?.document_id) {
+        const currentOutput = { [key]: outputs[key] };
+        updatedPromptOutputs = { ...updatedPromptOutputs, ...currentOutput };
+      }
+      Object.keys(updatedPromptOutputs).forEach((innerKey) => {
+        const [existingPromptId, , , existingIsSinglePass] =
+          innerKey.split("__"); // Extract promptId from key
+        if (
+          keyPromptId === existingPromptId &&
+          keyIsSinglePass === existingIsSinglePass
+        ) {
+          updatedPromptOutputs[innerKey].coverage = outputs[key]?.coverage;
+        }
+      });
+    });
+    return updatedPromptOutputs;
+  };
+
+  const promptOutputApi = async (
+    toolId,
+    docId = null,
+    promptId = null,
+    llmProfile = null,
+    isSinglePassExtract = false,
+  ) => {
+    const url = getUrl(
+      toolId,
+      docId,
+      promptId,
+      llmProfile,
+      isSinglePassExtract,
+    );
+    const requestOptions = {
+      method: "GET",
+      url,
+      headers: {
+        "X-CSRFToken": sessionDetails?.csrfToken,
+      },
+    };
+
+    return axiosPrivate(requestOptions)
+      .then((res) => res)
+      .catch((err) => err);
+  };
+
+  return {
+    promptOutputApi,
+    updatePromptOutputState,
+    generatePromptOutputKey,
+  };
+};
+
+export default usePromptOutput;

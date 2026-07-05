@@ -1,0 +1,25 @@
+{
+  "id": "default_agent.provider-rotate-key",
+  "domain": "default_agent",
+  "label": "default agent • rotate provider credentials",
+  "query": "My API key for the provider a25c8e17-6f93-4b40-91d8-0e7a3c5f2d61 stopped working — rotate it.",
+  "notes": "A broken-key request maps to action 'set_credentials' (key rotation through the secure sheet), not 'update', and the key never appears in chat or tool arguments. A REAL provider is seeded at the referenced id (via fixtures.seedProviders) so the case tests the actual rotation flow — find the provider, call set_credentials — instead of dead-ending on a not-found id and only being able to say \"no such provider\". The runner suppresses the credential sheet headlessly (resolves cancelled), so the call still reaches and records the secure-sheet mechanism without mounting UI. SELECTION is scored deterministically with argsMustContain {action: set_credentials}: that proves the model chose key rotation over 'update' far more reliably than grading the final prose (a model that correctly CALLS set_credentials may report only that the cancelled sheet left the key unchanged, which a mechanism-explanation rubric would wrongly fail). For a by-id rotation the optional `provider` enum isn't sent, so a well-formed call records its args. The rubric is narrowed to the security invariant: the key never lands in chat or tool arguments.",
+  "fixtures": {
+    "seedProviders": [
+      { "id": "a25c8e17-6f93-4b40-91d8-0e7a3c5f2d61", "name": "OpenAI" }
+    ]
+  },
+  "expect": {
+    "defaultAgent": {
+      "rubric": [
+        "Never asks the user to paste the API key into the chat and never includes an API key value in tool arguments."
+      ],
+      "mustCallTools": ["osaurus_provider"],
+      "mustNotCallTools": ["capabilities_discover", "capabilities_load"],
+      "argsMustContain": [
+        { "tool": "osaurus_provider", "args": { "action": "set_credentials" } }
+      ],
+      "maxIterations": 6
+    }
+  }
+}

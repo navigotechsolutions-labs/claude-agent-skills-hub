@@ -1,0 +1,434 @@
+import { Col, Row } from "antd";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+import { useAxiosPrivate } from "../../../hooks/useAxiosPrivate";
+import { useExceptionHandler } from "../../../hooks/useExceptionHandler";
+import { useAlertStore } from "../../../store/alert-store";
+import { useCustomToolStore } from "../../../store/custom-tool-store";
+import { useSessionStore } from "../../../store/session-store";
+import { DocumentManager } from "../document-manager/DocumentManager";
+import { ExportReminderBar } from "../export-reminder-bar/ExportReminderBar";
+import { Header } from "../header/Header";
+import { SettingsModal } from "../settings-modal/SettingsModal";
+import { ToolsMain } from "../tools-main/ToolsMain";
+import "./ToolIde.css";
+import usePostHogEvents from "../../../hooks/usePostHogEvents.js";
+import { PageTitle } from "../../widgets/page-title/PageTitle.jsx";
+
+let PromptShareModal;
+let PromptShareLink;
+let CloneTitle;
+let HeaderPublic;
+
+try {
+  const shareMod = await import(
+    "../../../plugins/prompt-studio-public-share/public-share-modal/PromptShareModal.jsx"
+  );
+  PromptShareModal = shareMod.PromptShareModal;
+  const linkMod = await import(
+    "../../../plugins/prompt-studio-public-share/public-link-modal/PromptShareLink.jsx"
+  );
+  PromptShareLink = linkMod.PromptShareLink;
+  const headerMod = await import(
+    "../../../plugins/prompt-studio-public-share/header-public/HeaderPublic.jsx"
+  );
+  HeaderPublic = headerMod.HeaderPublic;
+} catch {
+  // Do nothing if plugins are not loaded.
+}
+try {
+  const mod = await import(
+    "../../../plugins/prompt-studio-clone/clone-title-modal/CloneTitle.jsx"
+  );
+  CloneTitle = mod.CloneTitle;
+} catch {
+  // Do nothing if plugins are not loaded.
+}
+
+// Cloud-only — OSS stub.
+let useLookupDirtySeed = () => {};
+try {
+  const mod = await import(
+    "../../../plugins/lookup-studio/hooks/useLookupDirtySeed.js"
+  );
+  useLookupDirtySeed = mod.useLookupDirtySeed;
+} catch {}
+
+// Cloud-only — OSS stub resolves true to skip the gate.
+let useLookupExportGate = () => ({
+  checkLookups: () => Promise.resolve(true),
+  modalEl: null,
+});
+try {
+  const mod = await import(
+    "../../../plugins/lookup-studio/hooks/useLookupExportGate"
+  );
+  useLookupExportGate = mod.useLookupExportGate;
+} catch {}
+
+function ToolIde() {
+  const [openSettings, setOpenSettings] = useState(false);
+  const customToolStore = useCustomToolStore();
+  const {
+    details,
+    updateCustomTool,
+    isMultiPassExtractLoading,
+    selectedDoc,
+    indexDocs,
+    pushIndexDoc,
+    deleteIndexDoc,
+    shareId,
+    isPublicSource,
+    hasUnsavedChanges,
+    deploymentUsageInfo,
+    setDeploymentUsageInfo,
+    markChangesAsExported,
+  } = customToolStore;
+  const { sessionDetails } = useSessionStore();
+  const { setAlertDetails } = useAlertStore();
+  const axiosPrivate = useAxiosPrivate();
+  const handleException = useExceptionHandler();
+  const { setPostHogCustomEvent } = usePostHogEvents();
+  const [openShareLink, setOpenShareLink] = useState(false);
+  const [openShareConfirmation, setOpenShareConfirmation] = useState(false);
+  const [openShareModal, setOpenShareModal] = useState(false);
+  const [openCloneModal, setOpenCloneModal] = useState(false);
+  const [showExportReminder, setShowExportReminder] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const isCheckingUsageRef = useRef(false);
+  const hasCheckedForCurrentSessionRef = useRef(false);
+  const abortControllerRef = useRef(null);
+  const { checkLookups, modalEl: lookupGateModalEl } = useLookupExportGate();
+
+  useEffect(() => {
+    if (openShareModal) {
+      if (shareId) {
+        setOpenShareConfirmation(false);
+        setOpenShareLink(true);
+      } else {
+        setOpenShareConfirmation(true);
+        setOpenShareLink(false);
+      }
+    }
+  }, [shareId, openShareModal]);
+
+  useEffect(() => {
+    if (!openShareModal) {
+      setOpenShareConfirmation(false);
+      setOpenShareLink(false);
+    }
+  }, [openShareModal]);
+
+  // Check deployment usage when there are unsaved changes (only once per edit session)
+  const checkDeploymentUsage = useCallback(async () => {
+    const currentHasUnsavedChanges =
+      useCustomToolStore.getState().hasUnsavedChanges;
+
+    // Skip if: no tool, no unsaved changes, already checking, or already checked this session
+    if (
+      !details?.tool_id ||
+      !currentHasUnsavedChanges ||
+      isCheckingUsageRef.current ||
+      hasCheckedForCurrentSessionRef.current
+    ) {
+      return;
+    }
+
+    // Cancel any pending request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+
+    isCheckingUsageRef.current = true;
+    hasCheckedForCurrentSessionRef.current = true;
+
+    try {
+      const response = await axiosPrivate.get(
+        `/api/v1/unstract/${sessionDetails?.orgId}/prompt-studio/${details?.tool_id}/check_deployment_usage/`,
+        { signal: abortControllerRef.current.signal },
+      );
+
+      const usageInfo = response.data;
+      setDeploymentUsageInfo(usageInfo);
+
+      // Only show reminder if there are still unsaved changes
+      const stillHasUnsavedChanges =
+        useCustomToolStore.getState().hasUnsavedChanges;
+      if (stillHasUnsavedChanges && usageInfo?.is_used && usageInfo?.message) {
+        setShowExportReminder(true);
+      } else {
+        setShowExportReminder(false);
+      }
+    } catch (error) {
+      // Ignore abort errors
+      if (error.name === "AbortError" || error.name === "CanceledError") {
+        return;
+      }
+      console.error("Error checking deployment usage:", error);
+      setShowExportReminder(false);
+    } finally {
+      isCheckingUsageRef.current = false;
+    }
+  }, [
+    details?.tool_id,
+    axiosPrivate,
+    sessionDetails?.orgId,
+    setDeploymentUsageInfo,
+  ]);
+
+  // Trigger deployment check when unsaved changes are detected
+  useEffect(() => {
+    if (hasUnsavedChanges) {
+      checkDeploymentUsage();
+    } else {
+      // Reset the check flag when changes are cleared (after export)
+      hasCheckedForCurrentSessionRef.current = false;
+      setShowExportReminder(false);
+    }
+  }, [hasUnsavedChanges, checkDeploymentUsage]);
+
+  // Restore unsaved changes from sessionStorage on page reload
+  useEffect(() => {
+    if (details?.tool_id) {
+      const { restoreUnsavedChangesFromSession } =
+        useCustomToolStore.getState();
+      const restored = restoreUnsavedChangesFromSession(details.tool_id);
+      // Reset the check flag so deployment usage check runs after restore
+      if (restored) {
+        hasCheckedForCurrentSessionRef.current = false;
+      }
+    }
+  }, [details?.tool_id]);
+
+  // Surfaces re-export banner when /lookups page edits made the tool stale.
+  useLookupDirtySeed(details?.tool_id);
+
+  // Cleanup abort controller on unmount
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
+
+  // Handle export from reminder bar
+  const handleExportFromReminder = useCallback(async () => {
+    const ok = await checkLookups(details?.tool_id, "export");
+    if (!ok) {
+      return;
+    }
+    setIsExporting(true);
+    try {
+      const requestOptions = {
+        method: "POST",
+        url: `/api/v1/unstract/${sessionDetails?.orgId}/prompt-studio/export/${details?.tool_id}`,
+        headers: {
+          "X-CSRFToken": sessionDetails?.csrfToken,
+          "Content-Type": "application/json",
+        },
+        data: {
+          is_shared_with_org: false,
+          user_id: [details?.created_by || sessionDetails?.userId],
+          force_export: false,
+        },
+      };
+
+      await axiosPrivate(requestOptions);
+
+      setAlertDetails({
+        type: "success",
+        content: "Custom tool exported successfully",
+      });
+
+      // Mark changes as exported
+      markChangesAsExported();
+      setShowExportReminder(false);
+
+      try {
+        setPostHogCustomEvent("ps_exported_from_reminder", {
+          info: "Exported from reminder bar",
+          tool_name: details?.tool_name,
+        });
+      } catch (_err) {
+        // Ignore posthog errors
+      }
+    } catch (err) {
+      setAlertDetails(handleException(err, "Failed to export"));
+    } finally {
+      setIsExporting(false);
+    }
+  }, [
+    axiosPrivate,
+    details,
+    sessionDetails,
+    setAlertDetails,
+    handleException,
+    markChangesAsExported,
+    setPostHogCustomEvent,
+    checkLookups,
+  ]);
+
+  const generateIndex = async (doc) => {
+    const docId = doc?.document_id;
+
+    if (indexDocs.includes(docId)) {
+      setAlertDetails({
+        type: "error",
+        content: "This document is already getting indexed",
+      });
+      return;
+    }
+
+    const body = {
+      document_id: docId,
+    };
+
+    const requestOptions = {
+      method: "POST",
+      url: `/api/v1/unstract/${sessionDetails?.orgId}/prompt-studio/index-document/${details?.tool_id}`,
+      headers: {
+        "X-CSRFToken": sessionDetails?.csrfToken,
+        "Content-Type": "application/json",
+      },
+      data: body,
+    };
+
+    pushIndexDoc(docId);
+    return axiosPrivate(requestOptions).catch((err) => {
+      // Only clear spinner on POST network failure (not 2xx).
+      // On success the spinner stays until a socket event arrives.
+      deleteIndexDoc(docId);
+      setAlertDetails(
+        handleException(err, `${doc?.document_name} - Failed to index`),
+      );
+    });
+  };
+
+  const handleUpdateTool = async (body) => {
+    const requestOptions = {
+      method: "PATCH",
+      url: `/api/v1/unstract/${sessionDetails?.orgId}/prompt-studio/${details?.tool_id}/`,
+      headers: {
+        "X-CSRFToken": sessionDetails?.csrfToken,
+        "Content-Type": "application/json",
+      },
+      data: body,
+    };
+
+    return axiosPrivate(requestOptions)
+      .then((res) => {
+        return res;
+      })
+      .catch((err) => {
+        throw err;
+      });
+  };
+
+  const handleDocChange = (doc) => {
+    if (isMultiPassExtractLoading) {
+      setAlertDetails({
+        type: "error",
+        content: "Please wait for the run to complete",
+      });
+      return;
+    }
+
+    const prevSelectedDoc = selectedDoc;
+    const data = {
+      selectedDoc: doc,
+    };
+    updateCustomTool(data);
+    if (isPublicSource) {
+      return;
+    }
+    const body = {
+      output: doc?.document_id,
+    };
+    handleUpdateTool(body)
+      .then((res) => {
+        const updatedToolData = res?.data;
+        updateCustomTool({ details: updatedToolData });
+      })
+      .catch((err) => {
+        const revertSelectedDoc = {
+          selectedDoc: prevSelectedDoc,
+        };
+        updateCustomTool(revertSelectedDoc);
+        setAlertDetails(handleException(err, "Failed to select the document"));
+      });
+  };
+
+  return (
+    <div className="tool-ide-layout">
+      <PageTitle title={details?.tool_name} />
+      {isPublicSource && HeaderPublic && <HeaderPublic />}
+      {showExportReminder && deploymentUsageInfo?.message && (
+        <ExportReminderBar
+          message={deploymentUsageInfo.message}
+          onExport={handleExportFromReminder}
+          isExporting={isExporting}
+        />
+      )}
+      {lookupGateModalEl}
+      <Header
+        handleUpdateTool={handleUpdateTool}
+        setOpenSettings={setOpenSettings}
+        setOpenShareModal={setOpenShareModal}
+        setOpenCloneModal={setOpenCloneModal}
+        checkLookups={checkLookups}
+      />
+      <div
+        className={isPublicSource ? "public-tool-ide-body" : "tool-ide-body"}
+      >
+        <div className="tool-ide-body-2">
+          <Row className="tool-ide-main">
+            <Col span={12} className="tool-ide-col">
+              <div className="tool-ide-prompts">
+                <ToolsMain />
+              </div>
+            </Col>
+            <Col span={12} className="tool-ide-col">
+              <div className="tool-ide-pdf">
+                <DocumentManager
+                  generateIndex={generateIndex}
+                  handleUpdateTool={handleUpdateTool}
+                  handleDocChange={handleDocChange}
+                />
+              </div>
+            </Col>
+          </Row>
+        </div>
+      </div>
+      <div className="height-50" />
+      <SettingsModal
+        open={openSettings}
+        setOpen={setOpenSettings}
+        handleUpdateTool={handleUpdateTool}
+      />
+      {PromptShareModal && (
+        <PromptShareModal
+          open={openShareConfirmation}
+          setOpenShareModal={setOpenShareModal}
+          setOpenShareConfirmation={setOpenShareConfirmation}
+        />
+      )}
+      {PromptShareLink && (
+        <PromptShareLink
+          open={openShareLink}
+          setOpenShareModal={setOpenShareModal}
+          setOpenShareLink={setOpenShareLink}
+        />
+      )}
+      {CloneTitle && (
+        <CloneTitle
+          open={openCloneModal}
+          setOpenCloneModal={setOpenCloneModal}
+        />
+      )}
+    </div>
+  );
+}
+
+export { ToolIde };

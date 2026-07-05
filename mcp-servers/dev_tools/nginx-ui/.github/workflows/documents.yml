@@ -1,0 +1,73 @@
+name: Build Documents
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - '*'
+    paths:
+      - "docs/**/*.js"
+      - "docs/**/*.ts"
+      - "docs/**/*.vue"
+      - "docs/package.json"
+      - "docs/.env*"
+      - "docs/**/*.md"
+      - ".github/workflows/doc*.yml"
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+    paths:
+      - "docs/**/*.js"
+      - "docs/**/*.ts"
+      - "docs/**/*.vue"
+      - "docs/package.json"
+      - "docs/.env*"
+      - "docs/**/*.md"
+      - ".github/workflows/doc*.yml"
+  release:
+    types: [published]
+  workflow_run:
+    workflows: ["Sync branch"]
+    types:
+      - completed
+
+jobs:
+  build:
+    runs-on: macos-26
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up nodejs
+        uses: actions/setup-node@v6
+        with:
+          node-version: 23.x
+
+      - name: Install dependencies
+        run: |
+          corepack enable
+          corepack prepare pnpm@10 --activate
+          pnpm install
+        working-directory: docs
+
+      - name: Build
+        run: COMMIT_REF=$(git rev-parse HEAD) pnpm docs:build
+        working-directory: docs
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: docs/.vitepress/dist
+
+      - name: Install Wrangler
+        if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.event_name == 'release' || github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'))
+        run: pnpm add -w wrangler
+
+      - name: Deploy
+        if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.event_name == 'release' || github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'))
+        run: pnpm wrangler pages deploy "docs/.vitepress/dist/" --commit-dirty=true --project-name=nginxui
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}

@@ -1,0 +1,112 @@
+/* Styles for TopNavBar */
+
+.top-navbar-dp {
+  height: 25px;
+  width: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #184772;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.top-navbar-dp .navbar-img {
+  border-radius: 5px;
+}
+
+.top-navbar-dp .initials {
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+}
+
+.topbar-logo {
+  width: 120px;
+  height: auto;
+  margin-inline-end: 12px;
+}
+.logout-button {
+  color: inherit;
+  background: inherit;
+  box-shadow: none;
+  text-align: left;
+  padding: 5px 12px;
+  height: auto;
+  border-radius: 0;
+  border-color: transparent;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.logout-button:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.logout-button:active {
+  color: inherit !important;
+  border-color: transparent !important;
+}
+
+.top-nav-alert-col {
+  display: flex;
+  justify-content: center;
+}
+
+.top-nav-alert-col .top-nav-alert-msg {
+  margin-right: 6px;
+}
+
+.top-nav-alert-col .top-nav-alert-link {
+  text-decoration: underline;
+}
+
+.switch-org-menu .ant-dropdown-menu-title-content .ant-space {
+  display: block;
+}
+
+.user-profile-menu .ant-dropdown-menu-item .ant-dropdown-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 5px 12px;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.user-profile-menu .ant-dropdown-menu-item .ant-dropdown-trigger:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.page-identifier {
+  vertical-align: super;
+  color: white;
+}
+
+.page-heading {
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  margin-left: 10px;
+}
+
+.platform-switch-container {
+  display: flex;
+  align-items: center;
+}
+
+.user-profile-menu > .ant-dropdown-menu-item {
+  padding: 0 !important;
+}
+
+.user-profile-menu
+  > .ant-dropdown-menu-item
+  > .ant-dropdown-menu-title-content {
+  text-align: left;
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+}

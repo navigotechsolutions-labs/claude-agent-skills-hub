@@ -1,0 +1,144 @@
+package nginx
+
+import (
+	"bufio"
+	"fmt"
+	"github.com/tufanbarisyildirim/gonginx/dumper"
+	"github.com/tufanbarisyildirim/gonginx/parser"
+	"strings"
+)
+
+func buildComments(orig string, indent int) (content string) {
+	scanner := bufio.NewScanner(strings.NewReader(orig))
+	for scanner.Scan() {
+		content += strings.Repeat("\t", indent) + "# " + strings.TrimSpace(scanner.Text()) + "\n"
+	}
+	content = strings.TrimLeft(content, "\n")
+	return
+}
+
+func wrapRootBlock(name, content string) string {
+	trimmedContent := strings.TrimSpace(content)
+	if trimmedContent == "" {
+		return fmt.Sprintf("%s {\n}\n", name)
+	}
+
+	var builder strings.Builder
+	builder.WriteString(name)
+	builder.WriteString(" {\n")
+
+	scanner := bufio.NewScanner(strings.NewReader(strings.TrimRight(content, "\n")))
+	for scanner.Scan() {
+		line := scanner.Text()
+		if line == "" {
+			builder.WriteByte('\n')
+			continue
+		}
+		builder.WriteByte('\t')
+		builder.WriteString(line)
+		builder.WriteByte('\n')
+	}
+
+	builder.WriteString("}\n")
+	return builder.String()
+}
+
+func (c *NgxConfig) BuildConfig() (content string, err error) {
+	// Custom
+	if c.Custom != "" {
+		content += c.Custom
+		content += "\n\n"
+	}
+
+	// Upstreams
+	for _, u := range c.Upstreams {
+
+		upstream := ""
+		var comments string
+		for _, directive := range u.Directives {
+			if directive.Comments != "" {
+				comments = buildComments(directive.Comments, 1)
+			}
+			upstream += fmt.Sprintf("%s\t%s;\n", comments, directive.Orig())
+		}
+		comments = buildComments(u.Comments, 1)
+		content += fmt.Sprintf("upstream %s {\n%s%s}\n\n", u.Name, comments, upstream)
+	}
+
+	// Servers
+	for _, s := range c.Servers {
+		server := ""
+
+		// directives
+		for _, directive := range s.Directives {
+			var comments string
+			if directive.Comments != "" {
+				comments = buildComments(directive.Comments, 1)
+			}
+			if directive.Raw != "" {
+				server += comments + indentRawDirective(directive.Raw, 1) + "\n"
+				continue
+			}
+			if directive.Params != "" {
+				server += fmt.Sprintf("%s\t%s;\n", comments, directive.Orig())
+			}
+		}
+
+		if len(s.Directives) > 0 {
+			server += "\n"
+		}
+
+		// locations
+		locations := ""
+		for _, location := range s.Locations {
+			locationContent := ""
+			scanner := bufio.NewScanner(strings.NewReader(location.Content))
+			for scanner.Scan() {
+				locationContent += "\t\t" + scanner.Text() + "\n"
+			}
+			var comments string
+			if location.Comments != "" {
+				comments = buildComments(location.Comments, 1)
+			}
+			locations += fmt.Sprintf("%s\tlocation %s {\n%s\t}\n\n", comments, location.Path, locationContent)
+		}
+
+		server += locations
+
+		var comments string
+		if s.Comments != "" {
+			comments = buildComments(s.Comments, 0) + "\n"
+		}
+
+		content += fmt.Sprintf("%sserver {\n%s}\n\n", comments, server)
+	}
+
+	if c.RootBlock != "" {
+		content = wrapRootBlock(c.RootBlock, content)
+	}
+
+	p := parser.NewStringParser(content, parser.WithSkipValidDirectivesErr())
+	cfg, err := p.Parse()
+	if err != nil {
+		return
+	}
+
+	content = dumper.DumpConfig(cfg, dumper.IndentedStyle)
+	return
+}
+
+func indentRawDirective(raw string, indent int) string {
+	indentation := strings.Repeat("\t", indent)
+	var builder strings.Builder
+
+	// Use strings.Split rather than bufio.Scanner: the latter caps a single line
+	// at MaxScanTokenSize (64 KiB) and would silently drop content for very long
+	// embedded blocks (e.g. lua blocks with long single lines).
+	for _, line := range strings.Split(strings.TrimRight(raw, "\n"), "\n") {
+		builder.WriteString(indentation)
+		builder.WriteString(line)
+		builder.WriteByte('\n')
+	}
+
+	return strings.TrimRight(builder.String(), "\n")
+}

@@ -1,0 +1,439 @@
+package sites
+
+import (
+	"context"
+	"net/http"
+	"os"
+	"strings"
+	"time"
+
+	"github.com/0xJacky/Nginx-UI/internal/cert"
+	"github.com/0xJacky/Nginx-UI/internal/dns"
+	"github.com/0xJacky/Nginx-UI/internal/helper"
+	"github.com/0xJacky/Nginx-UI/internal/nginx"
+	"github.com/0xJacky/Nginx-UI/internal/site"
+	"github.com/0xJacky/Nginx-UI/internal/upstream"
+	"github.com/0xJacky/Nginx-UI/model"
+	"github.com/0xJacky/Nginx-UI/query"
+	"github.com/gin-gonic/gin"
+	"github.com/uozi-tech/cosy"
+	"github.com/uozi-tech/cosy/logger"
+	"gorm.io/gorm/clause"
+)
+
+// buildProxyTargets processes proxy targets similar to list.go logic
+func buildProxyTargets(fileName string) []site.ProxyTarget {
+	indexedSite := site.GetIndexedSite(fileName)
+
+	// Convert proxy targets, expanding upstream references
+	var proxyTargets []site.ProxyTarget
+	upstreamService := upstream.GetUpstreamService()
+
+	for _, target := range indexedSite.ProxyTargets {
+		// Check if target.Host is an upstream name
+		if upstreamDef, exists := upstreamService.GetUpstreamDefinition(target.Host); exists {
+			// Replace with upstream servers
+			for _, server := range upstreamDef.Servers {
+				proxyTargets = append(proxyTargets, site.ProxyTarget{
+					Host: server.Host,
+					Port: server.Port,
+					Type: server.Type,
+				})
+			}
+		} else {
+			// Regular proxy target
+			proxyTargets = append(proxyTargets, site.ProxyTarget{
+				Host: target.Host,
+				Port: target.Port,
+				Type: target.Type,
+			})
+		}
+	}
+
+	return proxyTargets
+}
+
+// checkDNSRecordExists verifies if a linked DNS record still exists
+func checkDNSRecordExists(domainID int, recordID string) bool {
+	if domainID == 0 || recordID == "" {
+		return false
+	}
+
+	svc := dns.NewService()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	records, err := svc.ListRecords(ctx, uint64(domainID), dns.RecordListOptions{})
+	if err != nil {
+		logger.Warn("Failed to list DNS records:", err)
+		return false
+	}
+
+	// Check if recordID exists in the list
+	for _, record := range records {
+		if record.ID == recordID {
+			return true
+		}
+	}
+
+	return false
+}
+
+func GetSite(c *gin.Context) {
+	name := helper.UnescapeURL(c.Param("name"))
+
+	path, err := site.ResolveAvailablePath(name)
+	if err != nil {
+		cosy.ErrHandler(c, err)
+		return
+	}
+
+	file, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "file not found",
+		})
+		return
+	}
+
+	s := query.Site
+	siteModel, err := s.Where(s.Path.Eq(path)).FirstOrCreate()
+	if err != nil {
+		cosy.ErrHandler(c, err)
+		return
+	}
+
+	certModel, err := model.FirstCert(name)
+	if err != nil {
+		logger.Warn(err)
+	}
+
+	// Check DNS record existence if linked
+	if siteModel.DNSDomainID != nil && siteModel.DNSRecordID != nil {
+		exists := checkDNSRecordExists(*siteModel.DNSDomainID, *siteModel.DNSRecordID)
+		siteModel.DNSRecordExists = &exists
+		// Update in database
+		if err := query.Site.Save(siteModel); err != nil {
+			logger.Warn("Failed to update DNS record exists status:", err)
+		}
+	}
+
+	if siteModel.Advanced {
+		origContent, err := os.ReadFile(path)
+		if err != nil {
+			cosy.ErrHandler(c, err)
+			return
+		}
+
+		c.JSON(http.StatusOK, site.Site{
+			ModifiedAt:   file.ModTime(),
+			Site:         siteModel,
+			Name:         name,
+			Config:       string(origContent),
+			AutoCert:     certModel.AutoCert == model.AutoCertEnabled,
+			Filepath:     path,
+			Status:       site.GetSiteStatus(name),
+			ProxyTargets: buildProxyTargets(name),
+		})
+		return
+	}
+
+	nginxConfig, err := nginx.ParseNgxConfig(path)
+	if err != nil {
+		cosy.ErrHandler(c, err)
+		return
+	}
+
+	certInfoMap := make(map[int][]*cert.Info)
+	for serverIdx, server := range nginxConfig.Servers {
+		for _, directive := range server.Directives {
+			if directive.Directive == "ssl_certificate" {
+				pubKey, err := cert.GetCertInfo(directive.Params)
+				if err != nil {
+					logger.Error("Failed to get certificate information", err)
+					continue
+				}
+				certInfoMap[serverIdx] = append(certInfoMap[serverIdx], pubKey)
+			}
+		}
+	}
+
+	c.JSON(http.StatusOK, site.Site{
+		Site:         siteModel,
+		ModifiedAt:   file.ModTime(),
+		Name:         name,
+		Config:       nginxConfig.FmtCode(),
+		Tokenized:    nginxConfig,
+		AutoCert:     certModel.AutoCert == model.AutoCertEnabled,
+		CertInfo:     certInfoMap,
+		Filepath:     path,
+		Status:       site.GetSiteStatus(name),
+		ProxyTargets: buildProxyTargets(name),
+	})
+}
+
+func SaveSite(c *gin.Context) {
+	name := helper.UnescapeURL(c.Param("name"))
+
+	var json struct {
+		Content       string   `json:"content" binding:"required"`
+		NamespaceID   uint64   `json:"namespace_id"`
+		SyncNodeIDs   []uint64 `json:"sync_node_ids"`
+		Overwrite     bool     `json:"overwrite"`
+		PostAction    string   `json:"post_action"`
+		DNSDomainID   *int     `json:"dns_domain_id"`
+		DNSRecordID   *string  `json:"dns_record_id"`
+		DNSRecordName *string  `json:"dns_record_name"`
+		DNSRecordType *string  `json:"dns_record_type"`
+	}
+
+	if !cosy.BindAndValid(c, &json) {
+		return
+	}
+
+	err := site.Save(name, json.Content, json.Overwrite, json.NamespaceID, json.SyncNodeIDs, json.PostAction)
+	if err != nil {
+		cosy.ErrHandler(c, err)
+		return
+	}
+
+	// Update DNS link information after file is saved
+	path, err := site.ResolveAvailablePath(name)
+	if err != nil {
+		cosy.ErrHandler(c, err)
+		return
+	}
+
+	s := query.Site
+	siteModel, err := s.Where(s.Path.Eq(path)).FirstOrCreate()
+	if err != nil {
+		logger.Warn("Failed to find or create site for DNS update:", err)
+	} else {
+		// Update DNS fields
+		siteModel.DNSDomainID = json.DNSDomainID
+		siteModel.DNSRecordID = json.DNSRecordID
+		siteModel.DNSRecordName = json.DNSRecordName
+		siteModel.DNSRecordType = json.DNSRecordType
+
+		// Check if record exists if DNS info is provided
+		if json.DNSDomainID != nil && json.DNSRecordID != nil {
+			exists := checkDNSRecordExists(*json.DNSDomainID, *json.DNSRecordID)
+			siteModel.DNSRecordExists = &exists
+		} else {
+			siteModel.DNSRecordExists = nil
+		}
+
+		if err := s.Save(siteModel); err != nil {
+			logger.Warn("Failed to save DNS link information:", err)
+		}
+	}
+
+	GetSite(c)
+}
+
+func RenameSite(c *gin.Context) {
+	oldName := helper.UnescapeURL(c.Param("name"))
+	var json struct {
+		NewName string `json:"new_name"`
+	}
+	if !cosy.BindAndValid(c, &json) {
+		return
+	}
+
+	err := site.Rename(oldName, json.NewName)
+	if err != nil {
+		cosy.ErrHandler(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "ok",
+	})
+}
+
+func disableMaintenanceIfExists(name string) error {
+	// Check if the site is in maintenance mode, if yes, disable maintenance mode first
+	maintenanceConfigPath, err := site.ResolveEnabledPath(name + site.MaintenanceSuffix)
+	if err != nil {
+		return err
+	}
+
+	if _, err := os.Stat(maintenanceConfigPath); err == nil {
+		// Site is in maintenance mode, disable it first
+		err := site.DisableMaintenance(name)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func enableSiteByName(name string) error {
+	if err := disableMaintenanceIfExists(name); err != nil {
+		return err
+	}
+
+	return site.Enable(name)
+}
+
+func disableSiteByName(name string) error {
+	if err := disableMaintenanceIfExists(name); err != nil {
+		return err
+	}
+
+	return site.Disable(name)
+}
+
+func EnableSite(c *gin.Context) {
+	name := helper.UnescapeURL(c.Param("name"))
+
+	err := enableSiteByName(name)
+	if err != nil {
+		cosy.ErrHandler(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "ok",
+	})
+}
+
+func DisableSite(c *gin.Context) {
+	name := helper.UnescapeURL(c.Param("name"))
+
+	err := disableSiteByName(name)
+	if err != nil {
+		cosy.ErrHandler(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "ok",
+	})
+}
+
+type batchSiteNamesRequest struct {
+	Names []string `json:"names" binding:"required,min=1"`
+}
+
+func BatchEnableSites(c *gin.Context) {
+	var json batchSiteNamesRequest
+	if !cosy.BindAndValid(c, &json) {
+		return
+	}
+
+	for _, name := range json.Names {
+		if err := enableSiteByName(name); err != nil {
+			cosy.ErrHandler(c, err)
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "ok",
+	})
+}
+
+func BatchDisableSites(c *gin.Context) {
+	var json batchSiteNamesRequest
+	if !cosy.BindAndValid(c, &json) {
+		return
+	}
+
+	for _, name := range json.Names {
+		if err := disableSiteByName(name); err != nil {
+			cosy.ErrHandler(c, err)
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "ok",
+	})
+}
+
+func DeleteSite(c *gin.Context) {
+	err := site.Delete(helper.UnescapeURL(c.Param("name")))
+	if err != nil {
+		cosy.ErrHandler(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "ok",
+	})
+}
+
+func BatchUpdateSites(c *gin.Context) {
+	cosy.Core[model.Site](c).SetValidRules(gin.H{
+		"namespace_id": "required",
+	}).SetItemKey("path").
+		BeforeExecuteHook(func(ctx *cosy.Ctx[model.Site]) {
+			effectedPath := make([]string, len(ctx.BatchEffectedIDs))
+			var sites []*model.Site
+			for i, name := range ctx.BatchEffectedIDs {
+				path, err := site.ResolveAvailablePath(name)
+				if err != nil {
+					ctx.AbortWithError(err)
+					return
+				}
+
+				effectedPath[i] = path
+				sites = append(sites, &model.Site{
+					Path: path,
+				})
+			}
+			s := query.Site
+			err := s.Clauses(clause.OnConflict{
+				DoNothing: true,
+			}).Create(sites...)
+			if err != nil {
+				ctx.AbortWithError(err)
+				return
+			}
+			ctx.BatchEffectedIDs = effectedPath
+		}).BatchModify()
+}
+
+func isInvalidSiteName(name string) bool {
+	return name == "" || name == "." ||
+		strings.ContainsAny(name, `/\`) || strings.Contains(name, "..")
+}
+
+func EnableMaintenanceSite(c *gin.Context) {
+	name := helper.UnescapeURL(c.Param("name"))
+	if isInvalidSiteName(name) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "invalid site name",
+		})
+		return
+	}
+
+	// If site is already enabled, disable the normal site first
+	enabledConfigPath, err := site.ResolveEnabledPath(name)
+	if err != nil {
+		cosy.ErrHandler(c, err)
+		return
+	}
+
+	if _, err := os.Stat(enabledConfigPath); err == nil {
+		// Site is already enabled, disable normal site first
+		err := site.Disable(name)
+		if err != nil {
+			cosy.ErrHandler(c, err)
+			return
+		}
+	}
+
+	// Then enable maintenance mode
+	err = site.EnableMaintenance(name)
+	if err != nil {
+		cosy.ErrHandler(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "ok",
+	})
+}

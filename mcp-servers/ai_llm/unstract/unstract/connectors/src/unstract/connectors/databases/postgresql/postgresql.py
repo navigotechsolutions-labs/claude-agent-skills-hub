@@ -1,0 +1,242 @@
+import datetime
+import os
+from typing import Any
+
+import psycopg2
+from psycopg2 import sql as psycopg2_sql
+from psycopg2.extensions import connection
+
+from unstract.connectors.constants import DatabaseTypeConstants
+from unstract.connectors.databases.psycopg_handler import PsycoPgHandler
+from unstract.connectors.databases.sql_safety import (
+    QuoteStyle,
+    safe_identifier,
+    validate_identifier,
+)
+from unstract.connectors.databases.unstract_db import UnstractDB
+
+
+class PostgreSQL(UnstractDB, PsycoPgHandler):
+    # Connection timeout settings (in seconds)
+    CONNECT_TIMEOUT = 30  # Time to establish connection
+    STATEMENT_TIMEOUT = 300  # Time for query execution (5 minutes)
+    KEEPALIVE_IDLE = 30  # Time before sending keepalive
+    KEEPALIVE_INTERVAL = 10  # Time between keepalive probes
+    KEEPALIVE_COUNT = 3  # Number of keepalive failures before dropping
+
+    def __init__(self, settings: dict[str, Any]):
+        super().__init__("PostgreSQL")
+
+        self.user = settings.get("user", "")
+        self.password = settings.get("password", "")
+        self.host = settings.get("host", "")
+        self.port = settings.get("port", "")
+        self.database = settings.get("database", "")
+        self.schema = settings.get("schema", "public")
+        self.connection_url = settings.get("connection_url", "")
+        if not self.schema:
+            self.schema = "public"
+        if not self.connection_url and not (
+            self.user and self.password and self.host and self.port and self.database
+        ):
+            raise ValueError(
+                "Either ConnectionURL or connection parameters must be provided."
+            )
+
+    @staticmethod
+    def get_id() -> str:
+        return "postgresql|6db35f45-be11-4fd5-80c5-85c48183afbb"
+
+    @staticmethod
+    def get_name() -> str:
+        return "PostgreSQL"
+
+    @staticmethod
+    def get_description() -> str:
+        return "postgresql Database"
+
+    @staticmethod
+    def get_icon() -> str:
+        return "/icons/connector-icons/Postgresql.png"
+
+    @staticmethod
+    def get_doc_url() -> str:
+        return "https://docs.unstract.com/unstract/unstract_platform/connectors/databases/postgresql_database/"
+
+    @staticmethod
+    def get_json_schema() -> str:
+        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
+        schema = f.read()
+        f.close()
+        return schema
+
+    @staticmethod
+    def can_write() -> bool:
+        return True
+
+    @staticmethod
+    def can_read() -> bool:
+        return True
+
+    def get_quote_style(self) -> QuoteStyle:
+        return QuoteStyle.DOUBLE_QUOTE
+
+    def sql_to_db_mapping(self, value: Any, column_name: str | None = None) -> str:
+        """Gets the python datatype of value and converts python datatype to
+        corresponding DB datatype.
+
+        Args:
+            value (Any): python value of any datatype
+            column_name (str | None): name of the column being mapped
+
+        Returns:
+            str: database columntype
+        """
+        data_type = type(value)
+
+        if data_type in (dict, list):
+            if column_name and column_name.endswith("_v2"):
+                return str(DatabaseTypeConstants.POSTGRES_JSONB)
+            else:
+                return str(DatabaseTypeConstants.POSTGRES_TEXT)
+
+        mapping = {
+            str: DatabaseTypeConstants.POSTGRES_TEXT,
+            int: DatabaseTypeConstants.POSTGRES_INTEGER,
+            float: DatabaseTypeConstants.POSTGRES_DOUBLE_PRECISION,
+            datetime.datetime: DatabaseTypeConstants.POSTGRES_TIMESTAMP,
+        }
+        return str(mapping.get(data_type, DatabaseTypeConstants.POSTGRES_TEXT))
+
+    def get_engine(self) -> connection:
+        """Returns a connection to the PostgreSQL database.
+
+        Returns:
+            connection: A connection to the PostgreSQL database.
+        """
+        conn_params = {
+            "keepalives": 1,
+            "keepalives_idle": self.KEEPALIVE_IDLE,
+            "keepalives_interval": self.KEEPALIVE_INTERVAL,
+            "keepalives_count": self.KEEPALIVE_COUNT,
+            "connect_timeout": self.CONNECT_TIMEOUT,
+            "application_name": "unstract_connector",
+            "sslmode": "prefer",
+        }
+
+        if self.connection_url:
+            # Use the URL directly without adding extra options
+            conn_params["dsn"] = self.connection_url
+        else:
+            # For non-URL connections
+            conn_params.update(
+                {
+                    "host": self.host,
+                    "port": self.port,
+                    "database": self.database,
+                    "user": self.user,
+                    "password": self.password,
+                }
+            )
+
+        con = psycopg2.connect(**conn_params)
+
+        # Set schema explicitly only if schema is specified (avoids PgBouncer issues)
+        if self.schema:
+            validate_identifier(self.schema)
+            with con.cursor() as cur:
+                cur.execute(
+                    psycopg2_sql.SQL("SET search_path TO {}").format(
+                        psycopg2_sql.Identifier(self.schema)
+                    )
+                )
+
+        return con
+
+    def get_create_table_base_query(self, table: str) -> str:
+        """Function to create a base create table sql query with PostgreSQL specific types.
+
+        Args:
+            table (str): db-connector table name
+
+        Returns:
+            str: generates a create sql base query with the constant columns
+        """
+        quoted_table = self._quote_identifier(table)
+        sql_query = (
+            f"CREATE TABLE IF NOT EXISTS {quoted_table} "
+            f"(id TEXT, "
+            f"created_by TEXT, created_at TIMESTAMP, "
+            f"metadata JSONB, "
+            f"user_field_1 BOOLEAN DEFAULT FALSE, "
+            f"user_field_2 INTEGER DEFAULT 0, "
+            f"user_field_3 TEXT DEFAULT NULL, "
+            f"status TEXT CHECK (status IN ('ERROR', 'SUCCESS')), "
+            f"error_message TEXT, "
+        )
+        return sql_query
+
+    def prepare_multi_column_migration(self, table_name: str, column_name: str) -> str:
+        quoted_table = self._quote_identifier(table_name)
+        quoted_col_v2 = safe_identifier(f"{column_name}_v2", QuoteStyle.DOUBLE_QUOTE)
+        sql_query = (
+            f"ALTER TABLE {quoted_table} "
+            f"ADD COLUMN {quoted_col_v2} JSONB, "
+            f"ADD COLUMN metadata JSONB, "
+            f"ADD COLUMN user_field_1 BOOLEAN DEFAULT FALSE, "
+            f"ADD COLUMN user_field_2 INTEGER DEFAULT 0, "
+            f"ADD COLUMN user_field_3 TEXT DEFAULT NULL, "
+            f"ADD COLUMN status TEXT CHECK (status IN ('ERROR', 'SUCCESS')), "
+            f"ADD COLUMN error_message TEXT"
+        )
+        return sql_query
+
+    def execute_query(
+        self, engine: Any, sql_query: str, sql_values: Any, **kwargs: Any
+    ) -> None:
+        table_name = kwargs.get("table_name", None)
+        PsycoPgHandler.execute_query(
+            engine=engine,
+            sql_query=sql_query,
+            sql_values=sql_values,
+            database=self.database,
+            schema=self.schema,
+            table_name=table_name,
+        )
+
+    @staticmethod
+    def _quote_identifier(identifier: str) -> str:
+        """Quote PostgreSQL identifier to handle special characters like hyphens.
+
+        PostgreSQL identifiers with special characters must be enclosed in double quotes.
+        This method adds proper quoting for table names containing hyphens, spaces,
+        or other special characters. Embedded double quotes are escaped.
+
+        Args:
+            identifier (str): Table name or column name to quote
+
+        Returns:
+            str: Properly quoted identifier safe for PostgreSQL
+        """
+        return safe_identifier(identifier, QuoteStyle.DOUBLE_QUOTE)
+
+    def get_sql_insert_query(
+        self, table_name: str, sql_keys: list[str], sql_values: list[str] | None = None
+    ) -> str:
+        """Override base method to add PostgreSQL-specific table name quoting.
+
+        Generates INSERT query with properly quoted table name for PostgreSQL.
+
+        Args:
+            table_name (str): Name of the table
+            sql_keys (list[str]): List of column names
+            sql_values (list[str], optional): SQL values for database-specific handling (ignored for PostgreSQL)
+
+        Returns:
+            str: INSERT query with properly quoted table name
+        """
+        quoted_table = self._quote_identifier(table_name)
+        quoted_keys = [safe_identifier(k, QuoteStyle.DOUBLE_QUOTE) for k in sql_keys]
+        keys_str = ", ".join(quoted_keys)
+        values_placeholder = ", ".join(["%s"] * len(sql_keys))
+        return f"INSERT INTO {quoted_table} ({keys_str}) VALUES ({values_placeholder})"

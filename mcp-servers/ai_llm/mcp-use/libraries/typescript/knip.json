@@ -1,0 +1,50 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "rules": {
+    "optionalPeerDependencies": "off"
+  },
+  "ignoreWorkspaces": [
+    "packages/mcp-use/examples/**",
+    "packages/create-mcp-use-app/src/templates/**",
+    "test_app"
+  ],
+  "workspaces": {
+    ".": {
+      "project": ["*.{js,ts}"]
+    },
+    "packages/mcp-use": {
+      "entry": [
+        "scripts/**/*.{js,mjs,ts}",
+        "tests/helpers/**/*.ts",
+        "tests/servers/**/*.ts",
+        "tests/docs/**/*.ts",
+        "tests/types/**/*.ts"
+      ],
+      "project": ["src/**/*.{ts,tsx}", "tests/**/*.{ts,tsx}"],
+      "ignoreBinaries": ["lsof", "sleep", "dev"]
+    },
+    "packages/cli": {
+      "project": ["src/**/*.ts", "tests/**/*.ts"],
+      "ignoreDependencies": [
+        "@mcp-use/inspector"
+      ]
+    },
+    "packages/inspector": {
+      "entry": [
+        "src/server/*.ts",
+        "start-auth-servers.ts",
+        "tests/e2e/**/*.{ts,tsx,mjs}"
+      ],
+      "project": ["src/**/*.{ts,tsx}", "tests/**/*.{ts,tsx}"],
+      "ignoreDependencies": [
+        "@scarf/scarf",
+        "tailwindcss",
+        "tw-animate-css"
+      ]
+    },
+    "packages/create-mcp-use-app": {
+      "entry": ["scripts/**/*.{js,mjs,ts}"],
+      "project": ["src/**/*.{ts,tsx}"]
+    }
+  }
+}

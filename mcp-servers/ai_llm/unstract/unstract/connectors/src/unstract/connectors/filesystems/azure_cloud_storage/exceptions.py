@@ -1,0 +1,46 @@
+import azure.core.exceptions as AzureException
+
+from unstract.connectors.exceptions import AzureHttpError, ConnectorError
+
+
+def parse_azure_error(e: Exception) -> ConnectorError:
+    """Parses the exception from Azure Cloud Storage.
+
+    Helps parse the Azure Cloud Storage error and wraps it with our
+    custom exception object to contain a user friendly message.
+
+    Args:
+        e (Exception): Error from Azure Cloud Storage
+
+    Returns:
+        ConnectorError: Unstract's ConnectorError object
+    """
+    if isinstance(e, ConnectorError):
+        return e
+
+    error_message = "Error from Azure Cloud Storage while testing connection. "
+
+    if isinstance(e, AzureException.ClientAuthenticationError):
+        client_error = e.message if hasattr(e, "message") else str(e)
+        error_message += (
+            f"Authentication failed. Please check your connection credentials. \n"
+            f"```\n{client_error}\n```"
+        )
+        # ClientAuthenticationError typically indicates 401 Unauthorized
+        status_code = getattr(e, "status_code", None) or 401
+        return ConnectorError(error_message, status_code=status_code)
+    elif isinstance(e, AzureException.ServiceRequestError):
+        client_error = e.message if hasattr(e, "message") else str(e)
+        error_message += f"Failed to connect to Azure service. \n```\n{client_error}\n```"
+        return ConnectorError(error_message)
+    elif isinstance(e, AzureException.HttpResponseError):
+        client_error = e.message if hasattr(e, "message") else str(e)
+        error_message += (
+            f"Azure service returned an error response. \n```\n{client_error}\n```"
+        )
+        # Preserve the HTTP status code from Azure's response
+        status_code = getattr(e, "status_code", None)
+        return AzureHttpError(error_message, status_code=status_code)
+    else:
+        error_message += f"Error from Azure Cloud Storage. \n```\n{str(e)}\n```"
+        return ConnectorError(error_message)

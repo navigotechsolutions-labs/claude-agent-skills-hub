@@ -1,0 +1,37 @@
+DISCLAIMER
+
+To use this service, you (hereinafter referred to as "the user") must agree to all terms of this agreement and complete the entire application process as prompted on the page. You can find DISCLAIMER.TXT in the source code or the released program, or view the copy below.
+
+To download and use the LAMDA software (hereinafter referred to as "this service"), developed by firerpa (address: github.com/firerpa, email: lamda.devel@gmail.com, hereinafter referred to as "the developer"), you must carefully read and agree to all terms in this agreement. Please ensure you have fully understood and agreed to the following content before downloading, installing, or using this software.
+You are not authorized to download, install, or use this software and its related services until you have fully read and accepted the terms of this agreement. Once you download, install, or use this software, you are deemed to have read and agreed to all terms of this agreement and are willing to be bound by them.
+
+Risk Disclosure:
+This service requires the device to have root access to run, and the default communication protocols and related certificate files are open information, which may increase the risk of your device being compromised.
+This service may contain unknown logical errors that could lead to potential risks such as data loss, system crashes, etc. The user decides whether to download and use this service at their own risk.
+
+
+1. The purpose of this service is to improve the work efficiency of security analysis and testing personnel for tasks such as application behavior and compliance analysis. The related tools provided are for legitimate and compliant app testing, analysis, and mock scenarios.
+This service itself does not provide any functionality to intrude, modify, or capture memory and network data of other applications. It integrates services provided by various major open-source frameworks for users to choose from, to facilitate security analysts and to reduce users' repetitive work and management costs.
+This service is not for profit. Users can download and use it according to their own needs, and no fees will be charged during the download or use process.
+
+2. This service respects and protects the user's personal privacy and will not steal any information from the user's device. The startup of this service and any rights to read, store, or transmit device data are entirely under the user's control.
+
+3. Users must use this service on a virtual device or a dedicated device with no private data. When using this service, users must comply with the laws and regulations of the People's Republic of China or the user's country or region of residence.
+This service must not be used for any illegal purposes, nor for any activities detrimental to others.
+
+4. Users may only use this service for legitimate study, research, or legally authorized application analysis, testing, and other similar activities. If a user violates the above principles and causes losses to a third party while using the software service, the user shall bear all responsibility.
+
+5. The developer shall not be held legally responsible for any accident, negligence, contract breach, defamation, copyright or intellectual property infringement, or any resulting losses (including but not limited to direct, indirect, incidental, or consequential losses) incurred by any entity or individual as a result of downloading or using this service.
+
+6. You may use this service for commercial purposes, but only for extending functionality or developing products based on the features, interfaces, or related services provided by this service. You agree not to use this service, its related services, or interfaces for any purpose that violates local laws and regulations, or to engage in activities that harm the interests of others.
+
+7. The user explicitly agrees to all the contents listed in the terms of this agreement and shall solely bear any potential risks and consequences arising from the use of this service. The developer assumes no legal liability.
+
+8. The developer has the right to unilaterally change, interrupt, or terminate part or all of this service and the terms of this disclaimer and its attachments at any time. Such changes will be announced via message push, web announcements, or other means and will take effect immediately upon publication without separate notification. If you continue to use the service after the disclaimer has been changed, it indicates that you have fully read, understood, and accepted the modified content.
+
+9. If any part of this disclaimer is deemed invalid or unenforceable, that part shall be amended in a manner consistent with applicable law to reflect, as closely as possible, the developer's original intent, and the remaining portions shall remain in full force and effect. The unenforceability of any part of this disclaimer does not constitute a waiver by the developer of the right to enforce that provision.
+
+10. Reservation of Rights: All other rights not expressly granted herein are reserved by the developer.
+
+
+Please confirm that you have read and accepted all the terms of this agreement. Otherwise, you are not authorized to download, install, or use this software and its related services.

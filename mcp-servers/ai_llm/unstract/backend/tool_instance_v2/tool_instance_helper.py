@@ -1,0 +1,583 @@
+import logging
+import os
+import uuid
+from typing import Any
+
+from account_v2.models import User
+from adapter_processor_v2.adapter_processor import AdapterProcessor
+from adapter_processor_v2.models import AdapterInstance
+from django.core.exceptions import PermissionDenied
+from django.core.exceptions import ValidationError as DjangoValidationError
+from jsonschema.exceptions import ValidationError as JSONValidationError
+from permissions.permission import has_group_access
+from prompt_studio.prompt_studio_registry_v2.models import PromptStudioRegistry
+from tenant_account_v2.organization_member_service import OrganizationMemberService
+from workflow_manager.workflow_v2.constants import WorkflowKey
+
+from tool_instance_v2.constants import JsonSchemaKey
+from tool_instance_v2.exceptions import ToolSettingValidationError
+from tool_instance_v2.models import ToolInstance
+from tool_instance_v2.tool_processor import ToolProcessor
+from unstract.sdk1.constants import AdapterTypes
+from unstract.sdk1.tool.validator import DefaultsGeneratingValidator
+from unstract.tool_registry.constants import AdapterPropertyKey
+from unstract.tool_registry.dto import Spec, Tool
+from unstract.tool_registry.tool_utils import ToolUtils
+
+# Import agentic registry if available (cloud-only feature)
+try:
+    from pluggable_apps.agentic_studio_registry.models import AgenticStudioRegistry
+
+    IS_AGENTIC_REGISTRY_AVAILABLE = True
+except ImportError:
+    IS_AGENTIC_REGISTRY_AVAILABLE = False
+
+logger = logging.getLogger(__name__)
+
+
+class ToolInstanceHelper:
+    @staticmethod
+    def get_tool_instances_by_workflow(
+        workflow_id: str,
+        order_by: str,
+        lookup: dict[str, Any] | None = None,
+        offset: int | None = None,
+        limit: int | None = None,
+    ) -> list[ToolInstance]:
+        wf_filter = {}
+        if lookup:
+            wf_filter = lookup
+        wf_filter[WorkflowKey.WF_ID] = workflow_id
+
+        if limit:
+            offset_value = 0 if not offset else offset
+            to = offset_value + limit
+            return list(
+                ToolInstance.objects.filter(**wf_filter)[offset_value:to].order_by(
+                    order_by
+                )
+            )
+        return list(ToolInstance.objects.filter(**wf_filter).all().order_by(order_by))
+
+    @staticmethod
+    def update_instance_metadata(
+        org_id: str, tool_instance: ToolInstance, metadata: dict[str, Any]
+    ) -> None:
+        ToolInstanceHelper.update_metadata_with_adapter_instances(
+            metadata, tool_instance.tool_id
+        )
+        metadata[JsonSchemaKey.TENANT_ID] = org_id
+        tool_instance.metadata = metadata
+        tool_instance.save()
+
+    @staticmethod
+    def update_metadata_with_adapter_properties(
+        metadata: dict[str, Any],
+        adapter_key: str,
+        adapter_property: dict[str, Any],
+        adapter_type: AdapterTypes,
+    ) -> None:
+        """Update the metadata dictionary with adapter properties.
+
+        Handles both legacy metadata (adapter names) and new metadata (adapter IDs).
+        Automatically converts adapter names to IDs for consistency.
+
+        Parameters:
+            metadata (dict[str, Any]):
+                The metadata dictionary to be updated with adapter properties.
+            adapter_key (str):
+                The key in the metadata dictionary corresponding to the adapter.
+            adapter_property (dict[str, Any]):
+                The properties of the adapter.
+            adapter_type (AdapterTypes):
+                The type of the adapter.
+
+        Returns:
+            None
+
+        """
+        if adapter_key in metadata:
+            adapter_value = metadata[adapter_key]
+            if not adapter_value:
+                return
+            if ToolInstanceHelper.is_uuid_format(adapter_value):
+                logger.debug(f"Adapter value '{adapter_value}' is already in UUID format")
+                adapter = AdapterInstance.objects.get(
+                    id=adapter_value, adapter_type=adapter_type.value
+                )
+            else:
+                adapter = AdapterProcessor.get_adapter_by_name_and_type(
+                    adapter_type=adapter_type, adapter_name=adapter_value
+                )
+            adapter_id = str(adapter.id)
+            metadata_key_for_id = adapter_property.get(
+                AdapterPropertyKey.ADAPTER_ID_KEY, AdapterPropertyKey.ADAPTER_ID
+            )
+            # Keep adapter_key and adapter_id_key both canonical to the resolved
+            # target UUID; otherwise stale UUID-shaped values at adapter_key
+            # bypass the lazy migrator and fail schema enum validation later.
+            metadata[adapter_key] = adapter_id
+            metadata[metadata_key_for_id] = adapter_id
+
+    @staticmethod
+    def update_metadata_with_adapter_instances(
+        metadata: dict[str, Any], tool_uid: str
+    ) -> None:
+        """Update the metadata dictionary with adapter instances.
+        Parameters:
+            metadata (dict[str, Any]):
+                The metadata dictionary to be updated with adapter instances.
+
+        Returns:
+            None
+        """
+        tool: Tool = ToolProcessor.get_tool_by_uid(tool_uid=tool_uid)
+        schema: Spec = ToolUtils.get_json_schema_for_tool(tool)
+        llm_properties = schema.get_llm_adapter_properties()
+        embedding_properties = schema.get_embedding_adapter_properties()
+        vector_db_properties = schema.get_vector_db_adapter_properties()
+        x2text_properties = schema.get_text_extractor_adapter_properties()
+        ocr_properties = schema.get_ocr_adapter_properties()
+
+        for adapter_key, adapter_property in llm_properties.items():
+            ToolInstanceHelper.update_metadata_with_adapter_properties(
+                metadata=metadata,
+                adapter_key=adapter_key,
+                adapter_property=adapter_property,
+                adapter_type=AdapterTypes.LLM,
+            )
+
+        for adapter_key, adapter_property in embedding_properties.items():
+            ToolInstanceHelper.update_metadata_with_adapter_properties(
+                metadata=metadata,
+                adapter_key=adapter_key,
+                adapter_property=adapter_property,
+                adapter_type=AdapterTypes.EMBEDDING,
+            )
+
+        for adapter_key, adapter_property in vector_db_properties.items():
+            ToolInstanceHelper.update_metadata_with_adapter_properties(
+                metadata=metadata,
+                adapter_key=adapter_key,
+                adapter_property=adapter_property,
+                adapter_type=AdapterTypes.VECTOR_DB,
+            )
+
+        for adapter_key, adapter_property in x2text_properties.items():
+            ToolInstanceHelper.update_metadata_with_adapter_properties(
+                metadata=metadata,
+                adapter_key=adapter_key,
+                adapter_property=adapter_property,
+                adapter_type=AdapterTypes.X2TEXT,
+            )
+
+        for adapter_key, adapter_property in ocr_properties.items():
+            ToolInstanceHelper.update_metadata_with_adapter_properties(
+                metadata=metadata,
+                adapter_key=adapter_key,
+                adapter_property=adapter_property,
+                adapter_type=AdapterTypes.OCR,
+            )
+
+    @staticmethod
+    def update_metadata_with_default_adapter(
+        adapter_type: AdapterTypes,
+        schema_spec: Spec,
+        adapter: AdapterInstance,
+        metadata: dict[str, Any],
+    ) -> None:
+        """Update the metadata of a tool instance with default values for
+        enabled adapters.
+
+        Parameters:
+            adapter_type (AdapterTypes): The type of adapter to update
+            the metadata for.
+            schema_spec (Spec): The schema specification for the tool.
+            adapter (AdapterInstance): The adapter instance to use for updating
+            the metadata.
+            metadata (dict[str, Any]): The metadata dictionary to update.
+
+        Returns:
+            None
+        """
+        properties = {}
+        if adapter_type == AdapterTypes.LLM:
+            properties = schema_spec.get_llm_adapter_properties()
+        if adapter_type == AdapterTypes.EMBEDDING:
+            properties = schema_spec.get_embedding_adapter_properties()
+        if adapter_type == AdapterTypes.VECTOR_DB:
+            properties = schema_spec.get_vector_db_adapter_properties()
+        if adapter_type == AdapterTypes.X2TEXT:
+            properties = schema_spec.get_text_extractor_adapter_properties()
+        if adapter_type == AdapterTypes.OCR:
+            properties = schema_spec.get_ocr_adapter_properties()
+        for adapter_key, adapter_property in properties.items():
+            metadata_key_for_id = adapter_property.get(
+                AdapterPropertyKey.ADAPTER_ID_KEY, AdapterPropertyKey.ADAPTER_ID
+            )
+            metadata[adapter_key] = str(adapter.id)
+            metadata[metadata_key_for_id] = str(adapter.id)
+
+    @staticmethod
+    def update_metadata_with_default_values(
+        tool_instance: ToolInstance, user: User
+    ) -> None:
+        """Update the metadata of a tool instance with default values for
+        enabled adapters.
+
+        Parameters:
+            tool_instance (ToolInstance): The tool instance to update the
+            metadata.
+
+        Returns:
+            None
+        """
+        metadata: dict[str, Any] = tool_instance.metadata
+        tool_uuid = tool_instance.tool_id
+
+        tool: Tool = ToolProcessor.get_tool_by_uid(tool_uid=tool_uuid)
+        schema: Spec = ToolUtils.get_json_schema_for_tool(tool)
+
+        default_adapters = AdapterProcessor.get_default_adapters(user=user)
+        for adapter in default_adapters:
+            try:
+                adapter_type = AdapterTypes(adapter.adapter_type)
+                ToolInstanceHelper.update_metadata_with_default_adapter(
+                    adapter_type=adapter_type,
+                    schema_spec=schema,
+                    adapter=adapter,
+                    metadata=metadata,
+                )
+            except ValueError:
+                logger.warning(f"Invalid AdapterType {adapter.adapter_type}")
+        tool_instance.metadata = metadata
+        tool_instance.save()
+
+    @staticmethod
+    def get_relative_path(absolute_path: str, base_path: str) -> str:
+        if absolute_path.startswith(base_path):
+            relative_path = os.path.relpath(absolute_path, base_path)
+        else:
+            relative_path = absolute_path
+        if relative_path == ".":
+            relative_path = ""
+        return relative_path
+
+    @staticmethod
+    def reorder_tool_instances(
+        instances_to_reorder: list[uuid.UUID],
+        workflow_id: uuid.UUID | None = None,
+    ) -> None:
+        """Reorders tool instances based on the list of tool UUIDs received.
+        Saves the instance in the DB.
+
+        Args:
+            instances_to_reorder (list[uuid.UUID]): Desired order of tool UUIDs
+            workflow_id (uuid.UUID | None): When given, scope the lookup to
+                this workflow so a stray UUID can't reach a foreign row.
+        """
+        logger.info("Reordering instances: %s", instances_to_reorder)
+        queryset = ToolInstance.objects
+        if workflow_id is not None:
+            queryset = queryset.filter(workflow_id=workflow_id)
+        for step, tool_instance_id in enumerate(instances_to_reorder):
+            tool_instance = queryset.get(pk=tool_instance_id)
+            tool_instance.step = step + 1
+            tool_instance.save()
+
+    @staticmethod
+    def is_uuid_format(value: str) -> bool:
+        """Check if a string is in UUID format."""
+        if not value or not isinstance(value, str):
+            return False
+        try:
+            uuid.UUID(value)
+            return True
+        except ValueError:
+            return False
+
+    @staticmethod
+    def has_adapter_ids_in_metadata(metadata: dict[str, Any], tool_uid: str) -> bool:
+        """Check if metadata already uses adapter IDs instead of names."""
+        tool: Tool = ToolProcessor.get_tool_by_uid(tool_uid=tool_uid)
+        schema: Spec = ToolUtils.get_json_schema_for_tool(tool)
+
+        # Get all adapter keys for this tool
+        adapter_keys = set()
+        adapter_keys.update(schema.get_llm_adapter_properties().keys())
+        adapter_keys.update(schema.get_embedding_adapter_properties().keys())
+        adapter_keys.update(schema.get_vector_db_adapter_properties().keys())
+        adapter_keys.update(schema.get_text_extractor_adapter_properties().keys())
+        adapter_keys.update(schema.get_ocr_adapter_properties().keys())
+
+        # Check if any adapter value is in UUID format (indicates already migrated)
+        for key in adapter_keys:
+            if (
+                key in metadata
+                and metadata[key]
+                and ToolInstanceHelper.is_uuid_format(metadata[key])
+            ):
+                return True  # Found at least one UUID, assume migrated
+
+        return False  # No UUIDs found, still using names
+
+    @staticmethod
+    def _migrate_adapter_keys_for_type(
+        metadata: dict[str, Any],
+        adapter_keys: dict[str, Any],
+        adapter_type: AdapterTypes,
+    ) -> tuple[dict[str, Any], bool]:
+        """Helper method to migrate adapter names to IDs for a specific adapter type."""
+        needs_update = False
+
+        for adapter_key in adapter_keys.keys():
+            if (
+                adapter_key in metadata
+                and metadata[adapter_key]
+                and not ToolInstanceHelper.is_uuid_format(metadata[adapter_key])
+            ):
+                adapter_name = metadata[adapter_key]
+                adapter = AdapterProcessor.get_adapter_by_name_and_type(
+                    adapter_type=adapter_type, adapter_name=adapter_name
+                )
+                logger.info(
+                    f"Migrating {adapter_type.value} adapter '{adapter_name}' to ID '{adapter.id}'"
+                )
+                metadata[adapter_key] = str(adapter.id)
+                needs_update = True
+
+        return metadata, needs_update
+
+    @staticmethod
+    def ensure_adapter_ids_in_metadata(
+        tool_instance: ToolInstance, user: User = None
+    ) -> dict[str, Any]:
+        """Lazy migration: convert adapter names to IDs if needed and update database."""
+        metadata = tool_instance.metadata.copy()
+
+        # Check if already migrated
+        if ToolInstanceHelper.has_adapter_ids_in_metadata(
+            metadata, tool_instance.tool_id
+        ):
+            return metadata
+
+        logger.info(f"Performing lazy migration for tool instance {tool_instance.id}")
+
+        # Get tool schema and name for error messages
+        tool: Tool = ToolProcessor.get_tool_by_uid(tool_uid=tool_instance.tool_id)
+        schema: Spec = ToolUtils.get_json_schema_for_tool(tool)
+
+        overall_needs_update = False
+
+        # Migrate each adapter type
+        adapter_types_to_migrate = [
+            (schema.get_llm_adapter_properties(), AdapterTypes.LLM),
+            (schema.get_embedding_adapter_properties(), AdapterTypes.EMBEDDING),
+            (schema.get_vector_db_adapter_properties(), AdapterTypes.VECTOR_DB),
+            (schema.get_text_extractor_adapter_properties(), AdapterTypes.X2TEXT),
+            (schema.get_ocr_adapter_properties(), AdapterTypes.OCR),
+        ]
+
+        for adapter_properties, adapter_type in adapter_types_to_migrate:
+            if adapter_properties:  # Only process if this tool uses this adapter type
+                metadata, needs_update = (
+                    ToolInstanceHelper._migrate_adapter_keys_for_type(
+                        metadata=metadata,
+                        adapter_keys=adapter_properties,
+                        adapter_type=adapter_type,
+                    )
+                )
+                overall_needs_update = overall_needs_update or needs_update
+
+        # Update database if changes were made
+        if overall_needs_update:
+            tool_instance.metadata = metadata
+            tool_instance.save()
+            logger.info(
+                f"Successfully migrated tool instance {tool_instance.id} to use adapter IDs"
+            )
+
+        return metadata
+
+    @staticmethod
+    def validate_tool_settings(
+        user: User, tool_uid: str, tool_meta: dict[str, Any]
+    ) -> bool:
+        """Function to validate Tools settings."""
+        # check if exported tool is valid for the user who created workflow
+        ToolInstanceHelper.validate_tool_access(user=user, tool_uid=tool_uid)
+        ToolInstanceHelper.validate_adapter_permissions(
+            user=user, tool_uid=tool_uid, tool_meta=tool_meta
+        )
+
+        tool: Tool = ToolProcessor.get_tool_by_uid(tool_uid=tool_uid)
+        tool_name: str = (
+            tool.properties.display_name if tool.properties.display_name else tool_uid
+        )
+        schema_json: dict[str, Any] = ToolProcessor.get_json_schema_for_tool(
+            tool_uid=tool_uid, user=user
+        )
+        try:
+            DefaultsGeneratingValidator(schema_json).validate(tool_meta)
+        except JSONValidationError as e:
+            logger.error(e, stack_info=True, exc_info=True)
+            err_msg = e.message
+            # TODO: Support other JSON validation errors or consider following
+            # https://github.com/networknt/json-schema-validator/blob/master/doc/cust-msg.md
+            if e.validator == "required":
+                for validator_val in e.validator_value:
+                    required_prop = e.schema.get("properties").get(validator_val)
+                    required_display_name = required_prop.get("title")
+                    err_msg = err_msg.replace(validator_val, required_display_name)
+            elif e.validator == "minItems":
+                validated_entity_display_name = e.schema.get("title")
+                err_msg = (
+                    f"'{validated_entity_display_name}' requires atleast"
+                    f" {e.validator_value} values."
+                )
+            elif e.validator == "maxItems":
+                validated_entity_display_name = e.schema.get("title")
+                err_msg = (
+                    f"'{validated_entity_display_name}' requires atmost"
+                    f" {e.validator_value} values."
+                )
+            else:
+                logger.warning(f"Unformatted exception sent to user: {err_msg}")
+            raise ToolSettingValidationError(
+                f"Error validating tool settings for '{tool_name}': {err_msg}"
+            )
+        return True
+
+    @staticmethod
+    def validate_adapter_permissions(
+        user: User, tool_uid: str, tool_meta: dict[str, Any]
+    ) -> None:
+        tool: Tool = ToolProcessor.get_tool_by_uid(tool_uid=tool_uid)
+        adapter_ids: set[str] = set()
+
+        for llm in tool.properties.adapter.language_models:
+            if llm.is_enabled and llm.adapter_id:
+                adapter_id = tool_meta[llm.adapter_id]
+            elif llm.is_enabled:
+                adapter_id = tool_meta[AdapterPropertyKey.DEFAULT_LLM_ADAPTER_ID]
+
+            adapter_ids.add(adapter_id)
+        for vdb in tool.properties.adapter.vector_stores:
+            if vdb.is_enabled and vdb.adapter_id:
+                adapter_id = tool_meta[vdb.adapter_id]
+            elif vdb.is_enabled:
+                adapter_id = tool_meta[AdapterPropertyKey.DEFAULT_VECTOR_DB_ADAPTER_ID]
+
+            adapter_ids.add(adapter_id)
+        for embedding in tool.properties.adapter.embedding_services:
+            if embedding.is_enabled and embedding.adapter_id:
+                adapter_id = tool_meta[embedding.adapter_id]
+            elif embedding.is_enabled:
+                adapter_id = tool_meta[AdapterPropertyKey.DEFAULT_EMBEDDING_ADAPTER_ID]
+
+            adapter_ids.add(adapter_id)
+        for text_extractor in tool.properties.adapter.text_extractors:
+            if text_extractor.is_enabled and text_extractor.adapter_id:
+                adapter_id = tool_meta[text_extractor.adapter_id]
+            elif text_extractor.is_enabled:
+                adapter_id = tool_meta[AdapterPropertyKey.DEFAULT_X2TEXT_ADAPTER_ID]
+
+            adapter_ids.add(adapter_id)
+
+        ToolInstanceHelper.validate_adapter_access(user=user, adapter_ids=adapter_ids)
+
+    @staticmethod
+    def validate_adapter_access(
+        user: User,
+        adapter_ids: set[str],
+    ) -> None:
+        adapter_instances = AdapterInstance.objects.filter(id__in=adapter_ids).all()
+        is_admin = OrganizationMemberService.is_user_organization_admin(user)
+
+        for adapter_instance in adapter_instances:
+            if not adapter_instance.is_usable:
+                logger.error(
+                    "Free usage for the configured sample adapter %s exhausted",
+                    adapter_instance.id,
+                )
+                error_msg = "Permission Error: Free usage for the configured trial adapter exhausted.Please connect your own service accounts to continue.Please see our documentation for more details:https://docs.unstract.com/unstract_platform/setup_accounts/whats_needed"  # noqa: E501
+
+                raise PermissionDenied(error_msg)
+
+            if not (
+                is_admin
+                or adapter_instance.shared_to_org
+                or adapter_instance.created_by == user
+                or adapter_instance.shared_users.filter(pk=user.pk).exists()
+                or has_group_access(user, adapter_instance)
+            ):
+                logger.error(
+                    "User %s doesn't have access to adapter %s",
+                    user.user_id,
+                    adapter_instance.id,
+                )
+                raise PermissionDenied(
+                    "You don't have permission to perform this action."
+                )
+
+    @staticmethod
+    def validate_tool_access(
+        user: User,
+        tool_uid: str,
+    ) -> None:
+        """Validate user access to a tool (prompt studio or agentic studio).
+
+        Args:
+            user: User requesting access
+            tool_uid: Tool UID (could be prompt_registry_id or agentic_registry_id)
+
+        Raises:
+            PermissionDenied: If user doesn't have access to the tool
+        """
+        # Try to find the tool in PromptStudioRegistry first
+        try:
+            if PromptStudioRegistry.objects.filter(pk=tool_uid).exists():
+                # Access derives from the linked project's current share
+                # state, not the export-time snapshot.
+                if (
+                    PromptStudioRegistry.objects.list_tools(user)
+                    .filter(pk=tool_uid)
+                    .exists()
+                ):
+                    return
+                raise PermissionDenied(
+                    "You don't have permission to perform this action."
+                )
+        except DjangoValidationError:
+            # Invalid UUID format, might be a static tool
+            logger.info(f"Not validating tool access for tool: {tool_uid}")
+            return
+
+        is_admin = OrganizationMemberService.is_user_organization_admin(user)
+
+        # Try to find the tool in AgenticStudioRegistry if available
+        if IS_AGENTIC_REGISTRY_AVAILABLE:
+            try:
+                agentic_registry_tool = AgenticStudioRegistry.objects.get(pk=tool_uid)
+                if (
+                    is_admin
+                    or agentic_registry_tool.created_by == user
+                    or agentic_registry_tool.shared_to_org
+                    or agentic_registry_tool.shared_users.filter(pk=user.pk).exists()
+                ):
+                    return
+                raise PermissionDenied(
+                    "You don't have permission to perform this action."
+                )
+            except AgenticStudioRegistry.DoesNotExist:
+                # Not an agentic studio tool either
+                pass
+            except DjangoValidationError:
+                # Invalid UUID format, might be a static tool
+                logger.info(f"Not validating tool access for tool: {tool_uid}")
+                return
+
+        # If we reach here, it's likely a static tool from registry
+        # No validation needed for static tools
+        logger.info(f"Not validating tool access for tool: {tool_uid}")
+        return

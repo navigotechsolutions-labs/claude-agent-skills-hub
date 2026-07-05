@@ -1,0 +1,121 @@
+---
+title: "Inspector"
+description: "Connect to an MCP server, run tools, inspect resources and prompts, and debug widgets."
+icon: "monitor"
+---
+
+Use the Inspector when you need to test an MCP server from the browser. It lets you connect to a server, call tools with typed inputs, inspect resources and prompts, try chat, preview widgets, and copy client setup commands.
+
+[![Try this live](/images/UseLiveSmall.svg)](https://inspector.mcp-use.com)
+
+<Frame caption="Inspector dashboard">
+  <img
+    src="/images/inspector/inspector-dashboard.jpg"
+    alt="MCP Inspector dashboard"
+  />
+</Frame>
+
+If your server was created with `mcp-use`, run the dev server and open the local Inspector:
+
+```bash
+npm run dev
+```
+
+The default local URLs are:
+
+| URL | Purpose |
+| --- | --- |
+| `http://localhost:3000/mcp` | MCP endpoint |
+| `http://localhost:3000/inspector` | Inspector UI |
+
+You can also open the hosted Inspector at [inspector.mcp-use.com](https://inspector.mcp-use.com) or run it with [`npx @mcp-use/inspector`](/inspector/cli).
+
+## Connect to a server
+
+Add a server from the dashboard. Choose the transport, enter the MCP endpoint URL, and click **Connect**.
+
+<Frame caption="Connection form">
+  <img
+    src="/images/inspector/connect-form.png"
+    alt="Inspector connection form"
+  />
+</Frame>
+
+For most local and public HTTP servers, use **Direct**. Use **Via Proxy** only when the browser cannot reach the server directly because of CORS or network policy. See [Connection settings](/inspector/connection-settings) for the short decision guide.
+
+When a server requires OAuth, the Inspector starts the auth flow for you. Complete the provider approval and return to the Inspector; the server card changes to the connected state after auth finishes.
+
+## Run a tool
+
+Open a connected server and select the **Tools** tab. Choose a tool, fill the generated form, and run it.
+
+<Frame caption="Server tools">
+  <img
+    src="/images/inspector/server-detail.png"
+    alt="Inspector server detail view with tools"
+  />
+</Frame>
+
+The Inspector shows the tool result, structured content, errors, and any widget returned by the tool. Use this view to verify schema validation, result shape, and widget data before testing the same server from a client.
+
+## Inspect resources and prompts
+
+Use **Resources** to read server-provided content by URI. Use **Prompts** to test reusable prompt templates with arguments.
+
+These tabs are useful when a client reports missing context. They show what the server actually exposes after connection and auth.
+
+## Try chat
+
+Use **Chat** to test how an LLM calls your server's tools in a conversation. The chat view can use hosted chat where available or a provider key stored in your browser.
+
+Keep chat testing focused on end-to-end behavior. Use the Tools tab first when you need to isolate input schemas, tool errors, or widget rendering.
+
+## Debug widgets
+
+When a tool returns an MCP App widget, the Inspector renders it below the tool result and exposes widget debug controls.
+
+Use the widget view to check:
+
+- the `props`, `output`, and metadata passed to the widget
+- inline, picture-in-picture, and fullscreen display modes
+- desktop, tablet, and mobile layout behavior
+- theme, locale, timezone, hover, touch, and safe-area settings
+- Content Security Policy behavior before trying the widget in a host
+
+See [Debug widgets in the Inspector](/inspector/debugging-chatgpt-apps) for the full workflow.
+
+## Add the server to a client
+
+After a server connects, use **Add to Client** to install or copy setup for supported clients such as Cursor, VS Code, Claude Desktop, Claude Code, Gemini CLI, and Codex CLI.
+
+<Frame caption="Add to Client actions">
+  <img
+    src="/images/inspector/add-to-client-dropdown.png"
+    alt="Add to Client dropdown in the Inspector"
+  />
+</Frame>
+
+The Inspector uses the active connection settings when it prepares the client setup. Confirm the server URL and connection name before copying commands or opening client deep links.
+
+## Command Palette
+
+Press `Cmd/Ctrl + K` to open the [Command Palette](/inspector/command-palette). Use it to jump to tools, prompts, resources, saved requests, connected servers, and client setup actions.
+
+For the full shortcut list, see [Keyboard shortcuts](/inspector/keyboard-shortcuts). For shareable links that open a server or tab directly, see [URL parameters](/inspector/url-parameters).
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="CLI usage" icon="terminal" href="/inspector/cli">
+    Run the Inspector from the command line and auto-connect to a server.
+  </Card>
+  <Card title="Connection settings" icon="settings" href="/inspector/connection-settings">
+    Choose Direct or Via Proxy and tune connection details only when needed.
+  </Card>
+  <Card title="Debug widgets" icon="bug" href="/inspector/debugging-chatgpt-apps">
+    Test MCP Apps widgets, layout behavior, CSP, and display modes.
+  </Card>
+  <Card title="Mount the Inspector" icon="plug-2" href="/inspector/integration">
+    Serve the Inspector from an Express, Hono, or mcp-use server.
+  </Card>
+</CardGroup>

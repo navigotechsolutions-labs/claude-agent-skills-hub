@@ -1,0 +1,50 @@
+services:
+  frontend:
+    image: unstract/frontend:${VERSION}
+    build:
+      dockerfile: docker/dockerfiles/frontend.Dockerfile
+      context: ..
+      target: production
+  backend:
+    image: unstract/backend:${VERSION}
+    build:
+      dockerfile: docker/dockerfiles/backend.Dockerfile
+      context: ..
+  runner:
+    image: unstract/runner:${VERSION}
+    build:
+      dockerfile: docker/dockerfiles/runner.Dockerfile
+      context: ..
+  tool-sidecar:
+    image: unstract/tool-sidecar:${VERSION}
+    build:
+      dockerfile: docker/dockerfiles/tool-sidecar.Dockerfile
+      context: ..
+  platform-service:
+    image: unstract/platform-service:${VERSION}
+    build:
+      dockerfile: docker/dockerfiles/platform.Dockerfile
+      context: ..
+  x2text-service:
+    image: unstract/x2text-service:${VERSION}
+    build:
+      dockerfile: docker/dockerfiles/x2text.Dockerfile
+      context: ..
+  tool-classifier:
+    image: unstract/tool-classifier:${VERSION}
+    build:
+      dockerfile: tools/classifier/Dockerfile
+      context: ..
+  tool-text_extractor:
+    image: unstract/tool-text-extractor:${VERSION}
+    build:
+      dockerfile: tools/text_extractor/Dockerfile
+      context: ..
+  # Unified worker image (replaces all individual worker images)
+  worker-unified:
+    image: unstract/worker-unified:${VERSION}
+    build:
+      dockerfile: docker/dockerfiles/worker-unified.Dockerfile
+      context: ..
+      args:
+        MINIMAL_BUILD: ${MINIMAL_BUILD:-0}  # Set to 1 for faster dev builds

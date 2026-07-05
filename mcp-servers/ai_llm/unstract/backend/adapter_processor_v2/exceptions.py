@@ -1,0 +1,113 @@
+import logging
+
+from rest_framework.exceptions import APIException
+
+from adapter_processor_v2.constants import AdapterKeys
+from unstract.sdk1.exceptions import SdkError
+
+logger = logging.getLogger(__name__)
+
+
+class IdIsMandatory(APIException):
+    status_code = 400
+    default_detail = "ID is Mandatory."
+
+
+class InValidType(APIException):
+    status_code = 400
+    default_detail = "Type is not Valid."
+
+
+class InValidAdapterId(APIException):
+    status_code = 400
+    default_detail = "Adapter ID is not Valid."
+
+
+class InternalServiceError(APIException):
+    status_code = 500
+    default_detail = "Internal Service error"
+
+
+class CannotDeleteDefaultAdapter(APIException):
+    status_code = 500
+    default_detail = (
+        "This is configured as default and cannot be deleted. "
+        "Please configure a different default before you try again!"
+    )
+
+
+class DuplicateAdapterNameError(APIException):
+    status_code = 400
+    default_detail: str = AdapterKeys.ADAPTER_NAME_EXISTS
+
+    def __init__(
+        self,
+        name: str | None = None,
+        detail: str | None = None,
+        code: str | None = None,
+    ) -> None:
+        if name:
+            detail = self.default_detail.replace("this name", f"name '{name}'")
+        super().__init__(detail, code)
+
+
+class TestAdapterError(APIException):
+    status_code = 500
+    default_detail = "Error while testing adapter"
+
+    def __init__(
+        self,
+        sdk_err: SdkError,
+        detail: str | None = None,
+        code: str | None = None,
+        adapter_name: str | None = None,
+    ):
+        if sdk_err.status_code:
+            # Provider 401 (e.g. bad API key for OpenAI) must not be
+            # forwarded — the frontend treats 401 as session expiry
+            # and logs the user out.
+            if sdk_err.status_code == 401:
+                logger.info("Remapping provider status code 401 to 400")
+                self.status_code = 400
+            else:
+                self.status_code = sdk_err.status_code
+        if detail is None:
+            adapter_name = f"'{adapter_name}'" if adapter_name else "adapter"
+            detail = f"Error testing {adapter_name}. {str(sdk_err)}"
+        super().__init__(detail, code)
+
+
+class TestAdapterInputError(APIException):
+    status_code = 400
+    default_detail = "Error while testing adapter, please check the configuration."
+
+
+class DeleteAdapterInUseError(APIException):
+    status_code = 409
+
+    def __init__(
+        self,
+        detail: str | None = None,
+        code: str | None = None,
+        adapter_name: str = "adapter",
+    ):
+        if detail is None:
+            if adapter_name != "adapter":
+                adapter_name = f"'{adapter_name}'"
+            detail = (
+                f"Cannot delete {adapter_name}. "
+                "It is used in a workflow or a prompt studio project"
+            )
+        super().__init__(detail, code)
+
+
+class AdapterNotFound(APIException):
+    status_code = 404
+    default_detail = "Adapter not found"
+
+    def __init__(
+        self,
+        detail: str | None = None,
+        code: str | None = None,
+    ) -> None:
+        super().__init__(detail, code)

@@ -196,6 +196,18 @@ def classify_repo(repo, config):
         
     return 'utilities'  # fallback category
 
+def get_dir_size_mb(directory):
+    total_size = 0
+    for dirpath, dirnames, filenames in os.walk(directory):
+        for f in filenames:
+            fp = os.path.join(dirpath, f)
+            if not os.path.islink(fp):
+                try:
+                    total_size += os.path.getsize(fp)
+                except OSError:
+                    pass
+    return total_size / (1024 * 1024)
+
 def clone_and_clean_repo(clone_url, target_dir):
     try:
         if os.path.exists(target_dir):
@@ -429,7 +441,19 @@ def main():
         
         if not args.dry_run:
             os.makedirs(os.path.join(servers_dir, cat), exist_ok=True)
-            clone_and_clean_repo(repo['clone_url'], dest_dir)
+            if clone_and_clean_repo(repo['clone_url'], dest_dir):
+                # Check cloned directory size
+                size_mb = get_dir_size_mb(dest_dir)
+                max_size_mb = config.get('max_clone_size_mb', 100)
+                if size_mb > max_size_mb:
+                    print(f"Repository {repo['full_name']} size is {size_mb:.2f} MB, which exceeds max limit of {max_size_mb} MB. Deleting and skipping local storage.")
+                    if os.name == 'nt':
+                        subprocess.run(["rmdir", "/s", "/q", dest_dir], shell=True, check=True)
+                    else:
+                        shutil.rmtree(dest_dir)
+                    repo['local_path'] = f"Not cloned (size exceeds {max_size_mb}MB)"
+            else:
+                repo['local_path'] = "Failed to clone"
         else:
             print(f"[Dry-Run] Would clone {repo['clone_url']} to {dest_dir}")
             

@@ -1,0 +1,204 @@
+from typing import TYPE_CHECKING
+
+from rest_framework.exceptions import APIException
+
+if TYPE_CHECKING:
+    from workflow_manager.workflow_v2.dto import ExecutionResponse
+
+
+class NotFoundException(APIException):
+    status_code = 404
+    default_detail = "The requested resource was not found."
+
+
+class PathVariablesNotFound(NotFoundException):
+    default_detail = "Path variable must be provided."
+
+
+class MandatoryWorkflowId(APIException):
+    status_code = 400
+    default_detail = "Workflow ID is mandatory"
+
+
+class ApiKeyCreateException(APIException):
+    status_code = 500
+    default_detail = "Exception while create API key"
+
+
+class Forbidden(APIException):
+    status_code = 403
+    default_detail = "User is forbidden from performing this action. Please contact admin"
+
+
+class APINotFound(NotFoundException):
+    default_detail = "API not found"
+
+
+class InvalidAPIRequest(APIException):
+    status_code = 400
+    default_detail = "Bad request"
+
+
+class InactiveAPI(NotFoundException):
+    default_detail = "API not found or Inactive"
+
+
+class UnauthorizedKey(APIException):
+    status_code = 401
+    default_detail = "Unauthorized"
+
+
+class NoActiveAPIKeyError(APIException):
+    status_code = 409
+    default_detail = "No active API keys configured for this deployment"
+
+    def __init__(
+        self,
+        detail: str | None = None,
+        code: str | None = None,
+        deployment_name: str = "this deployment",
+    ):
+        if detail is None:
+            detail = f"No active API keys configured for {deployment_name}"
+        super().__init__(detail, code)
+
+
+class RateLimitExceeded(APIException):
+    status_code = 429
+    default_detail = "Rate limit exceeded"
+
+    def __init__(
+        self,
+        current_usage: int = 0,
+        limit: int = 0,
+        limit_type: str = "organization",
+        detail: str | None = None,
+        code: str | None = None,
+    ):
+        from api_v2.rate_limit_constants import RateLimitMessages
+
+        self.current_usage = current_usage
+        self.limit = limit
+        self.limit_type = limit_type
+
+        if detail is None:
+            if limit_type == "organization":
+                detail = RateLimitMessages.get_org_limit_exceeded_message(
+                    current_usage=current_usage, limit=limit
+                )
+            else:
+                detail = RateLimitMessages.get_global_limit_exceeded_message()
+
+        super().__init__(detail, code)
+
+
+class ToolNotFoundInRegistry(APIException):
+    """Raised when a tool image is not found in the container registry.
+
+    This indicates a server-side platform deployment state issue - the
+    requested tool image is not available in the container registry.
+    HTTP 500 Internal Server Error is used because this is a server-side
+    configuration/deployment problem, not a client-actionable error.
+    """
+
+    status_code = 500
+    default_detail = "Tool not found in container registry"
+
+    # Error code used to identify this error in execution results
+    ERROR_CODE = "TOOL_IMAGE_NOT_FOUND"
+
+    def __init__(
+        self,
+        detail: str | None = None,
+        code: str | None = None,
+        tool_name: str = "",
+    ):
+        if detail is None:
+            if tool_name:
+                detail = (
+                    f"Tool '{tool_name}' not found in container registry. "
+                    f"Please ensure the tool is properly deployed."
+                )
+            else:
+                detail = self.default_detail
+        super().__init__(detail, code)
+
+
+def _check_error_code(error_value: str | None) -> bool:
+    """Check if error string contains the tool not found error code.
+
+    Uses deterministic error code matching instead of fragile string patterns.
+    """
+    if not error_value:
+        return False
+    return ToolNotFoundInRegistry.ERROR_CODE in str(error_value)
+
+
+def contains_tool_not_found_error(
+    response: "dict | ExecutionResponse",
+) -> bool:
+    """Check if response contains a tool not found in registry error.
+
+    Uses deterministic error code matching (TOOL_IMAGE_NOT_FOUND) instead of
+    fragile string pattern matching to identify this specific error condition.
+
+    Args:
+        response: Either a dict (from POST) or ExecutionResponse (from GET)
+
+    Returns:
+        bool: True if tool not found error is detected
+    """
+    # Get error and result from response
+    if isinstance(response, dict):
+        error = response.get("error")
+        result = response.get("result", [])
+    else:
+        error = getattr(response, "error", None)
+        result = getattr(response, "result", []) or []
+
+    # Check top-level error for error code
+    if _check_error_code(error):
+        return True
+
+    # Check file-level errors in result array
+    if isinstance(result, list):
+        for item in result:
+            if isinstance(item, dict):
+                if _check_error_code(item.get("error")):
+                    return True
+
+    return False
+
+
+class PresignedURLFetchError(APIException):
+    default_detail = "Failed to fetch file from presigned URL"
+
+    def __init__(
+        self,
+        url: str = "",
+        error_message: str = "",
+        status_code: int = 400,
+        detail: str | None = None,
+        code: str | None = None,
+    ):
+        if detail is None:
+            detail = f"Failed to fetch file from URL: {url}. Error: {error_message}"
+
+        self.status_code = status_code
+        super().__init__(detail, code)
+
+    @classmethod
+    def from_response_error(cls, url: str, response_status: int, error_message: str = ""):
+        """Create exception with status code derived from HTTP response"""
+        return cls(url=url, error_message=error_message, status_code=response_status)
+
+    @classmethod
+    def from_request_exception(cls, url: str, exception: Exception):
+        """Create exception with status code inferred from exception type"""
+        status_code = 400  # default
+        if isinstance(exception, TimeoutError):
+            status_code = 504
+        elif "connection" in str(exception).lower():
+            status_code = 502
+
+        return cls(url=url, error_message=str(exception), status_code=status_code)

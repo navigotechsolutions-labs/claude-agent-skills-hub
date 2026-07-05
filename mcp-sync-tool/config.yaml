@@ -6,6 +6,9 @@ servers_dir: "../mcp-servers"
 # Maximum number of repositories to clone/process per run
 max_repos: 50
 
+# Maximum size in MB allowed for cloned repositories (to prevent disk space exhaustion)
+max_clone_size_mb: 100
+
 # Default list of categories and keywords used to classify repositories.
 # The script will match keywords in the repository name, description, and topics.
 categories:

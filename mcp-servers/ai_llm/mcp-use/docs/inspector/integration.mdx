@@ -1,0 +1,110 @@
+---
+title: "Integration"
+description: "Mount the Inspector in a mcp-use or Hono application."
+icon: "plug-2"
+---
+
+{/* TODO: Add Inspector media when a screenshot or short clip would clarify the workflow. */}
+
+Mount the Inspector when you want it served from the same app as your MCP server. Servers built with `mcp-use/server` mount it automatically at `/inspector`.
+
+## Auto-Mounting with mcp-use
+
+When using `mcp-use` to create your MCP server, the Inspector is automatically available at `/inspector`.
+
+### Example
+
+The Inspector is automatically mounted when using `mcp-use/server`. No additional configuration is needed.
+
+```typescript
+import { MCPServer } from 'mcp-use/server'
+
+const server = new MCPServer({
+  name: 'my-server',
+  version: '1.0.0',
+})
+
+// Add your tools, resources, prompts...
+server.tool(/* ... */)
+
+// Start the server
+server.listen(3000)
+
+// Inspector is available at http://localhost:3000/inspector
+```
+
+## Manual Integration
+
+### Hono Integration
+
+Mount the Inspector on a Hono application:
+
+```typescript
+import { Hono } from 'hono'
+import { mountInspector } from '@mcp-use/inspector'
+
+const app = new Hono()
+
+// Your Hono routes
+app.get('/api/health', (c) => {
+  return c.json({ status: 'ok' })
+})
+
+// Mount inspector at /inspector
+mountInspector(app)
+
+// Start server with your Hono adapter
+export default app
+```
+
+## Path Customization
+
+The Inspector is mounted at `/inspector` by default. To serve it under another prefix, mount it on a sub-app and route that sub-app from your main app.
+
+### Hono with Custom Path
+
+```typescript
+import { Hono } from 'hono'
+import { mountInspector } from '@mcp-use/inspector'
+
+const app = new Hono()
+
+// Create sub-app for inspector
+const inspectorApp = new Hono()
+mountInspector(inspectorApp)
+
+app.route('/debug', inspectorApp)
+// Inspector now available at http://localhost:3000/debug/inspector
+```
+
+## Configuration Options
+
+### `mountInspector` Options
+
+Pass options only when the default mount behavior is not enough.
+
+```typescript
+import { mountInspector } from '@mcp-use/inspector'
+
+mountInspector(app, {
+  autoConnectUrl: 'http://localhost:3000/mcp',
+  sandboxOrigin: 'https://sandbox.example.com',
+})
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `autoConnectUrl` | `string \| null` | `undefined` | MCP server URL to auto-connect on load |
+| `devMode` | `boolean` | `true` if not production | Enables same-origin sandbox for MCP Apps widgets (no subdomain required) |
+| `sandboxOrigin` | `string \| null` | `undefined` | Override the sandbox origin for MCP Apps widgets |
+
+## Protect mounted Inspector routes
+
+The Inspector can call tools, read resources, and inspect prompts on any connected server. If you mount it outside local development, put it behind the same access controls you use for internal tools.
+
+## Related Documentation
+
+- [Getting Started](/inspector/index) - Basic inspector usage
+- [CLI Usage](/inspector/cli) - Standalone inspector usage
+- [Inspector chat components](/typescript/api-reference/client/inspector-chat-components) - API reference for exported chat UI
+- [Debug widgets in the Inspector](/inspector/debugging-chatgpt-apps) - Test widget rendering and host behavior
