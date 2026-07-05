@@ -1,0 +1,112 @@
+# Configuration for MCP Sync & Catalog Tool
+
+# Target directory where cloned MCP repositories will be placed (relative to script or absolute)
+servers_dir: "../mcp-servers"
+
+# Maximum number of repositories to clone/process per run
+max_repos: 50
+
+# Default list of categories and keywords used to classify repositories.
+# The script will match keywords in the repository name, description, and topics.
+categories:
+  databases:
+    label: "🗄️ Databases & Storage"
+    keywords:
+      - postgres
+      - postgresql
+      - mysql
+      - sqlite
+      - mongodb
+      - redis
+      - db
+      - database
+      - sql
+      - supabase
+  collaboration:
+    label: "💬 Collaboration & Productivity"
+    keywords:
+      - slack
+      - discord
+      - teams
+      - gmail
+      - google-drive
+      - notion
+      - calendar
+      - email
+      - linear
+      - jira
+      - confluence
+  dev_tools:
+    label: "🛠️ Developer Tools & APIs"
+    keywords:
+      - github
+      - gitlab
+      - git
+      - api
+      - docker
+      - kubernetes
+      - aws
+      - gcp
+      - azure
+      - terraform
+      - postman
+      - graphql
+      - terminal
+      - shell
+      - cli
+  browser_search:
+    label: "🌐 Web, Search & Browsing"
+    keywords:
+      - browser
+      - search
+      - google-search
+      - bing
+      - brave-search
+      - wikipedia
+      - crawl
+      - scrape
+      - web
+      - fetch
+      - puppeteer
+      - playwright
+  ai_llm:
+    label: "🧠 AI, LLMs & Reasoning"
+    keywords:
+      - openai
+      - gemini
+      - anthropic
+      - llm
+      - prompt
+      - langchain
+      - rag
+      - vector
+      - embed
+      - model
+      - agent
+  utilities:
+    label: "⚙️ System & Utilities"
+    keywords:
+      - filesystem
+      - file
+      - os
+      - math
+      - time
+      - weather
+      - calculator
+      - memory
+      - json
+      - yaml
+
+# Repository names to explicitly exclude from cloning
+exclude_repos:
+  - "punkpeye/awesome-mcp-servers"
+  - "modelcontextprotocol/servers"
+
+# Explicit repository category overrides (owner/repo: category_key)
+overrides:
+  "modelcontextprotocol/server-postgres": "databases"
+  "modelcontextprotocol/server-sqlite": "databases"
+  "modelcontextprotocol/server-filesystem": "utilities"
+  "modelcontextprotocol/server-google-drive": "collaboration"
+  "modelcontextprotocol/server-slack": "collaboration"
+  "modelcontextprotocol/server-github": "dev_tools"

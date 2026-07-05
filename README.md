@@ -35,6 +35,51 @@ This hub integrates several custom skills compiled from verified community exten
 
 ---
 
+<!-- mcp-catalog-start -->
+
+## 🔌 Model Context Protocol (MCP) Servers Catalog
+A dynamically updated list of Model Context Protocol (MCP) servers, automatically discovered, categorized, and cloned into this repository.
+
+### 📂 Categories
+* [🛠️ Developer Tools & APIs (3)](#-dev_tools)
+* [🌐 Web, Search & Browsing (2)](#-browser_search)
+* [🧠 AI, LLMs & Reasoning (4)](#-ai_llm)
+* [⚙️ System & Utilities (1)](#-utilities)
+
+---
+
+### 🛠️ Developer Tools & APIs <a name="-dev_tools"></a>
+
+| Server | Stars | Description | Location in Repo |
+| :--- | :---: | :--- | :--- |
+| [n8n](https://github.com/n8n-io/n8n) | ⭐ 195,248 | Fair-code workflow automation platform with native AI capabilities. Combine visual building with custom code, self-host or cloud, 400+ integrations. | [`/mcp-servers/dev_tools/n8n`](mcp-servers/dev_tools/n8n) |
+| [gemini-cli](https://github.com/google-gemini/gemini-cli) | ⭐ 105,753 | An open-source AI agent that brings the power of Gemini directly into your terminal. | [`/mcp-servers/dev_tools/gemini-cli`](mcp-servers/dev_tools/gemini-cli) |
+| [server-git](https://github.com/modelcontextprotocol/servers/tree/main/src/git) | ⭐ 2,500 | Official Model Context Protocol server providing git integration. | [`/mcp-servers/official-servers/src/git`](mcp-servers/official-servers/src/git) |
+
+### 🌐 Web, Search & Browsing <a name="-browser_search"></a>
+
+| Server | Stars | Description | Location in Repo |
+| :--- | :---: | :--- | :--- |
+| [Scrapling](https://github.com/D4Vinci/Scrapling) | ⭐ 68,135 | 🕷️ An adaptive Web Scraping framework that handles everything from a single request to a full-scale crawl! | [`/mcp-servers/browser_search/Scrapling`](mcp-servers/browser_search/Scrapling) |
+| [server-fetch](https://github.com/modelcontextprotocol/servers/tree/main/src/fetch) | ⭐ 2,500 | Official Model Context Protocol server providing fetch integration. | [`/mcp-servers/official-servers/src/fetch`](mcp-servers/official-servers/src/fetch) |
+
+### 🧠 AI, LLMs & Reasoning <a name="-ai_llm"></a>
+
+| Server | Stars | Description | Location in Repo |
+| :--- | :---: | :--- | :--- |
+| [server-everything](https://github.com/modelcontextprotocol/servers/tree/main/src/everything) | ⭐ 2,500 | Official Model Context Protocol server providing everything integration. | [`/mcp-servers/official-servers/src/everything`](mcp-servers/official-servers/src/everything) |
+| [server-memory](https://github.com/modelcontextprotocol/servers/tree/main/src/memory) | ⭐ 2,500 | Official Model Context Protocol server providing memory integration. | [`/mcp-servers/official-servers/src/memory`](mcp-servers/official-servers/src/memory) |
+| [server-sequentialthinking](https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking) | ⭐ 2,500 | Official Model Context Protocol server providing sequentialthinking integration. | [`/mcp-servers/official-servers/src/sequentialthinking`](mcp-servers/official-servers/src/sequentialthinking) |
+| [server-time](https://github.com/modelcontextprotocol/servers/tree/main/src/time) | ⭐ 2,500 | Official Model Context Protocol server providing time integration. | [`/mcp-servers/official-servers/src/time`](mcp-servers/official-servers/src/time) |
+
+### ⚙️ System & Utilities <a name="-utilities"></a>
+
+| Server | Stars | Description | Location in Repo |
+| :--- | :---: | :--- | :--- |
+| [server-filesystem](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem) | ⭐ 2,500 | Official Model Context Protocol server providing filesystem integration. | [`/mcp-servers/official-servers/src/filesystem`](mcp-servers/official-servers/src/filesystem) |
+
+<!-- mcp-catalog-end -->
+
 ## ⚙️ How Claude Code Uses Skills
 
 Claude Code automatically discovers and loads custom skills from its local configuration directory:
