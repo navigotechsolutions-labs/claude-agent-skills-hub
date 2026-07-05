@@ -336,6 +336,10 @@ def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     repo_dir = os.path.dirname(script_dir)  # Parent dir is target repository root
     
+    # Configure git to allow long paths on Windows
+    subprocess.run(["git", "config", "--global", "core.longpaths", "true"], check=False)
+    subprocess.run(["git", "config", "core.longpaths", "true"], cwd=repo_dir, check=False)
+    
     servers_dir = os.path.join(repo_dir, "mcp-servers")
     
     # 1. Fetch Official Servers
