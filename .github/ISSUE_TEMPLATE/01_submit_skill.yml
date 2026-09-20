@@ -1,0 +1,37 @@
+name: "💡 Propose / Submit New Skill"
+description: "Submit or propose a new custom Claude Code agent skill"
+title: "[Skill Proposal]: "
+labels: ["skill", "enhancement", "good first issue"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for proposing or contributing a skill to **Claude Agent Skills Hub**!
+  - type: input
+    id: skill_name
+    attributes:
+      label: Skill Name
+      description: What is the name of this skill? (e.g., `docker-optimizer-skill`)
+      placeholder: e.g. rust-analyzer-skill
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What does this skill do?
+      description: Provide a concise description of the skill's capabilities and role.
+      placeholder: "This skill equips Claude Code with specific prompt heuristics to..."
+    validations:
+      required: true
+  - type: textarea
+    id: prompt_sample
+    attributes:
+      label: Prompt / Instructions draft
+      description: Paste any draft instructions, rules, or system prompt snippets.
+  - type: checkboxes
+    id: willingness
+    attributes:
+      label: Contribution Intent
+      options:
+        - label: "I would like to open a Pull Request to add this skill myself!"
+          required: false

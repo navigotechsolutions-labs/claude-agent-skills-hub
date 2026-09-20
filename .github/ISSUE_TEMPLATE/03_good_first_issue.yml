@@ -1,0 +1,25 @@
+name: "🎯 Good First Issue / Starter Task"
+description: "A beginner-friendly task or feature request suitable for new contributors"
+title: "[Good First Issue]: "
+labels: ["good first issue", "help wanted"]
+body:
+  - type: textarea
+    id: task_description
+    attributes:
+      label: Task Summary
+      description: What needs to be done?
+      placeholder: "e.g. Add a new skill for Next.js 15 App Router conventions"
+    validations:
+      required: true
+  - type: textarea
+    id: expected_outcome
+    attributes:
+      label: Expected Outcome & Files to Change
+      placeholder: "Create folder `nextjs-app-router/` with `SKILL.md` and add entry to `README.md`"
+    validations:
+      required: true
+  - type: textarea
+    id: helpful_pointers
+    attributes:
+      label: Helpful Pointers / Resources
+      placeholder: "Reference https://nextjs.org/docs or existing `taste-skill/` directory as an example."

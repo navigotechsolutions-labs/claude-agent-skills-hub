@@ -1,13 +1,27 @@
 # 🤖 Claude Agent Skills Hub (Claude Code Custom Skills & Prompts)
 
 [![GitHub stars](https://img.shields.io/github/stars/navigotechsolutions-labs/claude-agent-skills-hub.svg?style=flat-ring)](https://github.com/navigotechsolutions-labs/claude-agent-skills-hub/stargazers)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-ring)](CONTRIBUTING.md)
+[![Good First Issues](https://img.shields.io/github/issues/navigotechsolutions-labs/claude-agent-skills-hub/good%20first%20issue.svg?style=flat-ring)](https://github.com/navigotechsolutions-labs/claude-agent-skills-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-ring)](#-contributors)
+[![npm version](https://img.shields.io/npm/v/claude-agent-skills-hub.svg?style=flat-ring)](https://www.npmjs.com/package/claude-agent-skills-hub)
 [![GitHub license](https://img.shields.io/github/license/navigotechsolutions-labs/claude-agent-skills-hub.svg?style=flat-ring)](LICENSE)
-[![Claude Code](https://img.shields.io/badge/Claude-Code-purple.svg)](https://anthropic.com)
-[![Category](https://img.shields.io/badge/Category-AI%20Developer%20Tools-blue.svg)](https://github.com/navigotechsolutions-labs)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/navigotechsolutions-labs/claude-agent-skills-hub/badge)](https://scorecard.dev/viewer/?site=github.com/navigotechsolutions-labs/claude-agent-skills-hub)
 
-A curated collection of custom developer skills and prompt templates for **Claude Code** (Anthropic's terminal-based coding agent). These behavioral profiles and system instructions extend Claude's capabilities across UI/UX design intelligence, WebGPU graphics development, Obsidian markdown integration, lazy-dev problem solving, and automated research workflows.
+A curated collection of custom developer skills, prompt harnesses, and **Model Context Protocol (MCP)** integrations for **Claude Code** (Anthropic's terminal coding agent). Extend Claude's capabilities across UI/UX design intelligence, WebGPU graphics development, Obsidian markdown integration, autonomous workflows, and agent tooling.
 
-Ideal for developers and prompt engineers looking to supercharge their terminal AI coding experience.
+### ⚡ 10-Second Quickstart (NPX)
+Browse and install any skill straight from your command line:
+```bash
+# List all skills & MCP tools
+npx claude-agent-skills-hub list
+
+# Inspect a skill
+npx claude-agent-skills-hub info taste-skill
+
+# Install a skill into your project
+npx claude-agent-skills-hub install taste-skill
+```
 
 ---
 
@@ -169,8 +183,49 @@ To load all these custom skills into your local Claude Code terminal session:
 
 3. Restart your Claude Code terminal session. The skills will be auto-loaded on startup!
 
+## 🤝 Contributing & Fast-Track Recognition
+
+We are actively welcoming contributions from the AI and open-source community!
+
+* **Got a custom prompt profile or skill?** [Submit a new skill](https://github.com/navigotechsolutions-labs/claude-agent-skills-hub/issues/new?template=01_submit_skill.yml) or open a PR.
+* **Want a starter issue?** Browse [Good First Issues](https://github.com/navigotechsolutions-labs/claude-agent-skills-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) and comment to claim one.
+* **Review Guarantee**: Maintainers review and merge clean community PRs within **24 hours**.
+
+Read our full [Contributing Guide](CONTRIBUTING.md) to get started!
+
+---
+
+## 👥 Contributors Hall of Fame
+
+Thanks to these wonderful people who have contributed to the Claude Agent Skills Hub:
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/navigotechsolutions-labs"><img src="https://avatars.githubusercontent.com/u/190802778?v=4" width="100px;" alt="Navigo Tech Solutions Labs"/><br /><sub><b>Navigo Tech Solutions Labs</b></sub></a><br /><a href="#code-navigotechsolutions-labs" title="Code">💻</a> <a href="#doc-navigotechsolutions-labs" title="Documentation">📖</a> <a href="#maintenance-navigotechsolutions-labs" title="Maintenance">🚧</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+Contributions of any kind welcome! Follow the [all-contributors specification](https://github.com/all-contributors/all-contributors).
+
+---
+
+## 🔒 Security & Supply Chain
+
+Security issues and vulnerabilities should be reported according to our [Security Policy](SECURITY.md).
+Automated supply-chain analysis runs weekly via the [OpenSSF Scorecard](https://scorecard.dev/viewer/?site=github.com/navigotechsolutions-labs/claude-agent-skills-hub).
+
 ---
 
 ## 📄 License
 
 Distributed under the **MIT License**. See [LICENSE](LICENSE) for details.
+

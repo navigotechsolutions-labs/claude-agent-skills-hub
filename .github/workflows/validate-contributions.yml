@@ -1,0 +1,40 @@
+name: Validate Contributions
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validate JSON Files
+        run: |
+          node -e '
+            const fs = require("fs");
+            ["mcp_data.json"].forEach(file => {
+              if (fs.existsSync(file)) {
+                try {
+                  JSON.parse(fs.readFileSync(file, "utf8"));
+                  console.log("✅ " + file + " parsed successfully.");
+                } catch (err) {
+                  console.error("❌ JSON parse error in " + file + ":", err.message);
+                  process.exit(1);
+                }
+              }
+            });
+          '
+
+      - name: Verify CLI Run
+        run: |
+          node bin/cli.js list

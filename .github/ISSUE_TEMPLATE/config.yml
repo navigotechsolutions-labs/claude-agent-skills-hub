@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 GitHub Discussions / Ideas
+    url: https://github.com/navigotechsolutions-labs/claude-agent-skills-hub/discussions
+    about: Ask questions or discuss new ideas for Claude Code skills and integrations.
+  - name: ⚡ Contributing Guide
+    url: https://github.com/navigotechsolutions-labs/claude-agent-skills-hub/blob/master/CONTRIBUTING.md
+    about: Read our step-by-step contribution instructions.

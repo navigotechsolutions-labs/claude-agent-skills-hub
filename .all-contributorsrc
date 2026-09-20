@@ -1,0 +1,26 @@
+{
+  "projectName": "claude-agent-skills-hub",
+  "projectOwner": "navigotechsolutions-labs",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "navigotechsolutions-labs",
+      "name": "Navigo Tech Solutions Labs",
+      "avatar_url": "https://avatars.githubusercontent.com/u/190802778?v=4",
+      "profile": "https://github.com/navigotechsolutions-labs",
+      "contributions": [
+        "code",
+        "doc",
+        "maintenance",
+        "ideas"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7
+}

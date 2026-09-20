@@ -1,0 +1,34 @@
+name: "🔌 Submit / Request MCP Server"
+description: "Suggest a Model Context Protocol (MCP) server to add to our catalog"
+title: "[MCP Request]: "
+labels: ["mcp-server", "catalog"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Suggest an MCP server for our auto-catalog and sync list!
+  - type: input
+    id: mcp_name
+    attributes:
+      label: MCP Server Name / Repository
+      placeholder: owner/repo or https://github.com/...
+    validations:
+      required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - "🗄️ Databases & Storage"
+        - "💬 Collaboration & Productivity"
+        - "🛠️ Developer Tools & APIs"
+        - "🌐 Web, Search & Browsing"
+        - "🧠 AI, LLMs & Reasoning"
+        - "⚙️ System & Utilities"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Brief Description
+      placeholder: What does this MCP server enable Claude / coding agents to do?

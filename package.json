@@ -1,0 +1,36 @@
+{
+  "name": "claude-agent-skills-hub",
+  "version": "1.1.0",
+  "description": "Curated collection of custom developer skills, prompt harnesses, and MCP servers for Claude Code",
+  "main": "bin/cli.js",
+  "bin": {
+    "claude-agent-skills-hub": "./bin/cli.js",
+    "claude-skills": "./bin/cli.js"
+  },
+  "scripts": {
+    "start": "node bin/cli.js list",
+    "test": "node bin/cli.js list",
+    "mcp": "node bin/cli.js mcp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/navigotechsolutions-labs/claude-agent-skills-hub.git"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "anthropic",
+    "skills",
+    "mcp",
+    "model-context-protocol",
+    "ai-agent",
+    "prompts",
+    "developer-tools"
+  ],
+  "author": "Navigo Tech Solutions Labs",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/navigotechsolutions-labs/claude-agent-skills-hub/issues"
+  },
+  "homepage": "https://github.com/navigotechsolutions-labs/claude-agent-skills-hub#readme"
+}
