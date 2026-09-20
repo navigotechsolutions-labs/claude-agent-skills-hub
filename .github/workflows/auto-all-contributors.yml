@@ -1,0 +1,80 @@
+name: Auto All-Contributors on PR Merge
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [master, main]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  add-contributor:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Add Contributor to Hall of Fame
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const author = context.payload.pull_request.user.login;
+            const avatarUrl = context.payload.pull_request.user.avatar_url;
+            const profileUrl = context.payload.pull_request.user.html_url;
+
+            if (author.endsWith('[bot]') || author === context.repo.owner) {
+              console.log('Skipping bot or repo owner');
+              return;
+            }
+
+            console.log(`Processing contributor: ${author}`);
+
+            const configPath = '.all-contributorsrc';
+            let config = { contributors: [] };
+            if (fs.existsSync(configPath)) {
+              config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+            }
+
+            const exists = config.contributors.some(c => c.login.toLowerCase() === author.toLowerCase());
+            if (exists) {
+              console.log(`${author} is already in contributors list.`);
+              return;
+            }
+
+            config.contributors.push({
+              login: author,
+              name: author,
+              avatar_url: avatarUrl,
+              profile: profileUrl,
+              contributions: ["code", "doc"]
+            });
+
+            fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
+
+            // Append cell to table in README.md if present
+            let readme = fs.readFileSync('README.md', 'utf8');
+            const newCell = `      <td align="center" valign="top" width="14.28%"><a href="${profileUrl}"><img src="${avatarUrl}" width="100px;" alt="${author}"/><br /><sub><b>${author}</b></sub></a><br /><a href="#code-${author}" title="Code">💻</a> <a href="#doc-${author}" title="Documentation">📖</a></td>\n`;
+
+            if (readme.includes('</tr>\n  </tbody>')) {
+              readme = readme.replace('</tr>\n  </tbody>', `${newCell}    </tr>\n  </tbody>`);
+              fs.writeFileSync('README.md', readme, 'utf8');
+            }
+
+      - name: Commit and Push Update
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .all-contributorsrc README.md
+          git commit -m "chore(contributors): add @${{ github.event.pull_request.user.login }} to Hall of Fame [skip ci]" || exit 0
+          git push origin HEAD:${{ github.ref }}
