@@ -1,5 +1,7 @@
 # 🤖 Claude Agent Skills Hub (Claude Code Custom Skills & Prompts)
 
+🌐 [English](README.md) | [简体中文](README.zh.md)
+
 [![GitHub stars](https://img.shields.io/github/stars/navigotechsolutions-labs/claude-agent-skills-hub.svg?style=flat-ring)](https://github.com/navigotechsolutions-labs/claude-agent-skills-hub/stargazers)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-ring)](CONTRIBUTING.md)
 [![Good First Issues](https://img.shields.io/github/issues/navigotechsolutions-labs/claude-agent-skills-hub/good%20first%20issue.svg?style=flat-ring)](https://github.com/navigotechsolutions-labs/claude-agent-skills-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
