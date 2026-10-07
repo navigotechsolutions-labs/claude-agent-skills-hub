@@ -1,0 +1,16 @@
+# Ignore repository bloat from npm package tarball
+mcp-servers/
+.github/
+scripts/
+tests/
+test/
+*.png
+*.jpg
+*.jpeg
+*.svg
+.DS_Store
+Thumbs.db
+*.log
+.git*
+SCHEDULE_30_DAYS.md
+GROWTH_PLAYBOOK.md

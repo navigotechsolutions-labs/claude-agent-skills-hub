@@ -54,7 +54,10 @@ This hub integrates several custom skills compiled from verified community exten
 <!-- mcp-catalog-start -->
 
 ## 🔌 Model Context Protocol (MCP) Servers Catalog
-A dynamically updated list of Model Context Protocol (MCP) servers, automatically discovered, categorized, and cloned into this repository.
+A dynamically curated directory of Model Context Protocol (MCP) servers categorized for discovery.
+
+> [!NOTE]
+> **Upstream Catalog Attribution**: The star ratings (⭐) displayed below represent the metrics of the respective upstream open-source repositories and authors. They are displayed for discovery reference and are not metrics of the Claude Agent Skills Hub repository.
 
 ### 📂 Categories
 * [🗄️ Databases & Storage (1)](#-databases)
@@ -221,7 +224,7 @@ Contributions of any kind welcome! Follow the [all-contributors specification](h
 ## 🔒 Security & Supply Chain
 
 Security issues and vulnerabilities should be reported according to our [Security Policy](SECURITY.md).
-Automated supply-chain analysis runs weekly via the [OpenSSF Scorecard](https://scorecard.dev/viewer/?site=github.com/navigotechsolutions-labs/claude-agent-skills-hub).
+Automated supply-chain analysis runs weekly via the [OpenSSF Scorecard](https://scorecard.dev/viewer/?site=github.com/navigotechsolutions-labs/claude-agent-skills-hub). *(Note: OpenSSF Scorecard assesses security hygiene; OpenSSF Criticality Score is tracked independently via ecosystem metrics).*
 
 ---
 

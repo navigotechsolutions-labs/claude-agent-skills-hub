@@ -1,15 +1,35 @@
 {
   "name": "claude-agent-skills-hub",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Curated collection of custom developer skills, prompt harnesses, and MCP servers for Claude Code",
   "main": "bin/cli.js",
   "bin": {
     "claude-agent-skills-hub": "./bin/cli.js",
     "claude-skills": "./bin/cli.js"
   },
+  "files": [
+    "bin",
+    "mcp_data.json",
+    "README.md",
+    "LICENSE",
+    "taste-skill",
+    "minimalist-skill",
+    "brutalist-skill",
+    "stitch-skill",
+    "notebooklm-py",
+    "llm-council",
+    "obsidian-cli",
+    "obsidian-bases",
+    "obsidian-markdown",
+    "brandkit",
+    "redesign-skill",
+    "soft-skill",
+    "ui-ux-pro-max-skill",
+    "webgpu-threejs-tsl"
+  ],
   "scripts": {
     "start": "node bin/cli.js list",
-    "test": "node bin/cli.js list",
+    "test": "node tests/cli.test.js",
     "mcp": "node bin/cli.js mcp"
   },
   "repository": {
