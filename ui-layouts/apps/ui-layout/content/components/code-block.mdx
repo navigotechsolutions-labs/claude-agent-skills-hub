@@ -1,0 +1,105 @@
+export const metadata = {
+  title: 'Code Block',
+  description:
+    'A lightweight React component based on SHIKI that provides syntax highlighting using Shiki with built-in copy functionality. Perfect for displaying code snippets in documentation, blogs, and developer tools with dark/light theme support.',
+  keywords: [
+    'Code block component',
+    'Syntax highlighting',
+    'Shiki code',
+    'Code display component',
+    'Copy button',
+    'Shiki highlighter',
+    'Code viewer',
+    'Syntax highlighter',
+    'Code block',
+    'React code component',
+    'Shiki syntax highlighting',
+    'React code viewer',
+    'Syntax highlighting React',
+    'Developer documentation',
+    'Code snippet component',
+    'Lightweight syntax highlighter',
+    'Shiki React component',
+    'Code highlighting',
+  ],
+};
+
+
+<ComponentCodePreview name='code-block' isFitheight />
+
+## Installation
+
+<Tabs defaultValue="cli">
+
+<TabsList className='border-b w-full bg-muted justify-start h-12 mt-4'>
+  <TabsTrigger value='cli' className="data-[state=active]:bg-card gap-1 data-[state=active]:border">CLI</TabsTrigger>
+  <TabsTrigger value='manual' className="data-[state=active]:bg-card gap-1 data-[state=active]:border">Manual</TabsTrigger>
+</TabsList>
+
+  <TabsContent value="cli">
+   <CodeTabsMdx>
+      ```bash
+      npx uilayouts@latest add shiki-code
+      ```
+
+      ```bash
+      npx shadcn@latest add 'https://www.ui-layouts.com/r/shiki-code.json'
+      ```
+
+   </CodeTabsMdx>
+  </TabsContent>
+  
+  <TabsContent value="manual" manualType>
+  
+   ```bash
+      npm install shiki
+   ```
+
+ <CodeSnippets name="shiki-code" />
+
+  </TabsContent>
+</Tabs>
+
+
+## Usage
+
+```tsx
+import { ShikiCode } from '@/components/ui/shiki-code';
+
+export default function MyComponent() {
+  const code = `function hello() {
+  console.log('Hello, World!');
+}`;
+
+  return (
+    <ShikiCode 
+      code={code} 
+      lang="javascript" 
+      className="my-4"
+    />
+  );
+}
+```
+
+## API Reference
+
+### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `code` | `string` | **Required** | The code string to highlight |
+| `lang` | `string` | `'tsx'` | Programming language for syntax highlighting |
+| `className` | `string` | `undefined` | Additional CSS classes for styling |
+
+### Supported Languages
+
+The component supports all languages that Shiki supports, including:
+
+- `javascript`, `typescript`, `tsx`, `jsx`
+- `python`, `java`, `c`, `cpp`, `csharp`
+- `html`, `css`, `scss`, `sass`
+- `json`, `yaml`, `toml`, `xml`
+- `markdown`, `mdx`
+- `bash`, `shell`, `powershell`
+- And many more...
+

@@ -1,0 +1,103 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop, phase-2-dev]
+  pull_request:
+    branches: [main, phase-2-dev]
+
+jobs:
+  quality:
+    name: Quality Gates (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [22, 24]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint (CLI)
+        run: pnpm --filter hyperiux lint
+
+      - name: Test (CLI)
+        run: pnpm --filter hyperiux test
+
+      - name: Build (CLI, syntax check + smoke)
+        run: pnpm --filter hyperiux build
+
+      - name: Smoke - CLI bin entrypoint
+        run: pnpm --filter hyperiux smoke:bin
+
+      - name: Pack dry-run (CLI)
+        run: cd packages/cli && npm pack --dry-run
+
+      - name: Lint (MCP server)
+        run: pnpm --filter hyperiux-mcp-server lint
+
+      - name: Test (MCP server)
+        run: pnpm --filter hyperiux-mcp-server test
+
+      - name: Build (MCP server)
+        run: pnpm --filter hyperiux-mcp-server build
+
+      - name: Smoke - MCP server starts
+        run: |
+          # Closed stdin makes the stdio transport hit EOF and exit cleanly
+          # on its own - this just confirms the server boots without error.
+          node packages/mcp-server/dist/index.js < /dev/null 2>&1 | tee /tmp/mcp-smoke.log
+          grep -q "Hyperiux MCP server running via stdio" /tmp/mcp-smoke.log
+
+      - name: Pack dry-run (MCP server)
+        run: cd packages/mcp-server && npm pack --dry-run
+
+  security:
+    name: Security & Compliance
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Dependency audit
+        run: pnpm audit --audit-level=high
+
+      - name: License check
+        run: npx --yes license-checker --onlyAllow 'MIT;MIT*;ISC;Apache-2.0;BSD-2-Clause;BSD-3-Clause;0BSD;BlueOak-1.0.0;CC0-1.0;Unlicense;Python-2.0;Zlib' --excludePackages 'hyperiux-ui@0.1.0;gsap@3.15.0'
+
+      - name: Secret scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          head: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+          extra_args: --only-verified
+
+      - name: Dependency review
+        uses: actions/dependency-review-action@v4
+        if: github.event_name == 'pull_request'

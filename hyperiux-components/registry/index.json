@@ -1,0 +1,497 @@
+[
+  {
+    "name": "dotted-grid",
+    "title": "Dotted Grid",
+    "category": "backgrounds",
+    "type": "registry:component",
+    "registryPath": "registry/effects/backgrounds/dotted-grid/registry.json",
+    "importPath": "@/components/effects/dotted-grid",
+    "target": "src/components/effects/dotted-grid"
+  },
+  {
+    "name": "spider-particles",
+    "title": "Spider Particles",
+    "category": "backgrounds",
+    "type": "registry:component",
+    "registryPath": "registry/effects/backgrounds/spider-particles/registry.json",
+    "importPath": "@/components/effects/spider-particles",
+    "target": "src/components/effects/spider-particles"
+  },
+  {
+    "name": "dot-transition",
+    "title": "Dot Transition",
+    "category": "backgrounds",
+    "type": "registry:component",
+    "registryPath": "registry/effects/backgrounds/dot-transition/registry.json",
+    "importPath": "@/components/effects/dot-transition",
+    "target": "src/components/effects/dot-transition"
+  },
+  {
+    "name": "arrow-fill-button",
+    "title": "Arrow Fill Button",
+    "category": "buttons",
+    "type": "registry:component",
+    "registryPath": "registry/effects/buttons/arrow-fill-button/registry.json",
+    "importPath": "@/components/effects/arrow-fill-button",
+    "target": "src/components/effects/arrow-fill-button"
+  },
+  {
+    "name": "link-button",
+    "title": "Link Button",
+    "category": "buttons",
+    "type": "registry:component",
+    "registryPath": "registry/effects/buttons/link-button/registry.json",
+    "importPath": "@/components/effects/link-button",
+    "target": "src/components/effects/link-button"
+  },
+  {
+    "name": "scramble-link-button",
+    "title": "Scramble Link Button",
+    "category": "buttons",
+    "type": "registry:component",
+    "registryPath": "registry/effects/buttons/scramble-link-button/registry.json",
+    "importPath": "@/components/effects/scramble-link-button",
+    "target": "src/components/effects/scramble-link-button"
+  },
+  {
+    "name": "metallic-button",
+    "title": "Metallic Button",
+    "category": "buttons",
+    "type": "registry:component",
+    "registryPath": "registry/effects/buttons/metallic-button/registry.json",
+    "importPath": "@/components/effects/metallic-button",
+    "target": "src/components/effects/metallic-button"
+  },
+  {
+    "name": "shiny-button",
+    "title": "Shiny Button",
+    "category": "buttons",
+    "type": "registry:component",
+    "registryPath": "registry/effects/buttons/shiny-button/registry.json",
+    "importPath": "@/components/effects/shiny-button",
+    "target": "src/components/effects/shiny-button"
+  },
+  {
+    "name": "zoom-slider",
+    "title": "Zoom Slider",
+    "category": "carousels",
+    "type": "registry:component",
+    "registryPath": "registry/effects/carousels/zoom-slider/registry.json",
+    "importPath": "@/components/effects/zoom-slider",
+    "target": "src/components/effects/zoom-slider"
+  },
+  {
+    "name": "parallax-strip-slider",
+    "title": "Parallax Strip Slider",
+    "category": "carousels",
+    "type": "registry:component",
+    "registryPath": "registry/effects/carousels/parallax-strip-slider/registry.json",
+    "importPath": "@/components/effects/parallax-strip-slider",
+    "target": "src/components/effects/parallax-strip-slider"
+  },
+  {
+    "name": "arc-flow-carousel",
+    "title": "Arc Flow Carousel",
+    "category": "carousels",
+    "type": "registry:component",
+    "registryPath": "registry/effects/carousels/arc-flow-carousel/registry.json",
+    "importPath": "@/components/effects/arc-flow-carousel",
+    "target": "src/components/effects/arc-flow-carousel"
+  },
+  {
+    "name": "dimensional-switch-slider",
+    "title": "Dimensional Switch Slider",
+    "category": "carousels",
+    "type": "registry:component",
+    "registryPath": "registry/effects/carousels/dimensional-switch-slider/registry.json",
+    "importPath": "@/components/effects/dimensional-switch-slider",
+    "target": "src/components/effects/dimensional-switch-slider"
+  },
+  {
+    "name": "ellipse-carousel",
+    "title": "Ellipse Carousel",
+    "category": "carousels",
+    "type": "registry:component",
+    "registryPath": "registry/effects/carousels/ellipse-carousel/registry.json",
+    "importPath": "@/components/effects/ellipse-carousel",
+    "target": "src/components/effects/ellipse-carousel"
+  },
+  {
+    "name": "orbit-flip-slider",
+    "title": "Orbit Flip Slider",
+    "category": "carousels",
+    "type": "registry:component",
+    "registryPath": "registry/effects/carousels/orbit-flip-slider/registry.json",
+    "importPath": "@/components/effects/orbit-flip-slider",
+    "target": "src/components/effects/orbit-flip-slider"
+  },
+  {
+    "name": "animated-faq",
+    "title": "Animated FAQ",
+    "category": "components",
+    "type": "registry:component",
+    "registryPath": "registry/effects/components/animated-faq/registry.json",
+    "importPath": "@/components/effects/animated-faq",
+    "target": "src/components/effects/animated-faq"
+  },
+  {
+    "name": "hover-stack",
+    "title": "Hover Stack",
+    "category": "components",
+    "type": "registry:component",
+    "registryPath": "registry/effects/components/hover-stack/registry.json",
+    "importPath": "@/components/effects/hover-stack",
+    "target": "src/components/effects/hover-stack"
+  },
+  {
+    "name": "information-drawer",
+    "title": "Information Drawer",
+    "category": "components",
+    "type": "registry:component",
+    "registryPath": "registry/effects/components/information-drawer/registry.json",
+    "importPath": "@/components/effects/information-drawer",
+    "target": "src/components/effects/information-drawer"
+  },
+  {
+    "name": "timeline",
+    "title": "Timeline",
+    "category": "components",
+    "type": "registry:component",
+    "registryPath": "registry/effects/components/timeline/registry.json",
+    "importPath": "@/components/effects/timeline",
+    "target": "src/components/effects/timeline"
+  },
+  {
+    "name": "border-beam",
+    "title": "Border Beam",
+    "category": "components",
+    "type": "registry:component",
+    "registryPath": "registry/effects/components/border-beam/registry.json",
+    "importPath": "@/components/effects/border-beam",
+    "target": "src/components/effects/border-beam"
+  },
+  {
+    "name": "gsap-flip-card",
+    "title": "GSAP Flip Card",
+    "category": "components",
+    "type": "registry:component",
+    "registryPath": "registry/effects/components/gsap-flip-card/registry.json",
+    "importPath": "@/components/effects/gsap-flip-card",
+    "target": "src/components/effects/gsap-flip-card"
+  },
+  {
+    "name": "phantom-image-trail",
+    "title": "Phantom Image Trail",
+    "category": "cursor",
+    "type": "registry:component",
+    "registryPath": "registry/effects/cursor/phantom-image-trail/registry.json",
+    "importPath": "@/components/effects/phantom-image-trail",
+    "target": "src/components/effects/phantom-image-trail"
+  },
+  {
+    "name": "pixelated-image-effect",
+    "title": "Pixelated Image Effect",
+    "category": "cursor",
+    "type": "registry:component",
+    "registryPath": "registry/effects/cursor/pixelated-image-effect/registry.json",
+    "importPath": "@/components/effects/pixelated-image-effect",
+    "target": "src/components/effects/pixelated-image-effect"
+  },
+  {
+    "name": "liquid-glass-cursor",
+    "title": "Liquid Glass Cursor",
+    "category": "cursor",
+    "type": "registry:component",
+    "registryPath": "registry/effects/cursor/liquid-glass-cursor/registry.json",
+    "importPath": "@/components/effects/liquid-glass-cursor",
+    "target": "src/components/effects/liquid-glass-cursor"
+  },
+  {
+    "name": "numeric-tunnel",
+    "title": "Numeric Tunnel",
+    "category": "loaders",
+    "type": "registry:component",
+    "registryPath": "registry/effects/loaders/numeric-tunnel/registry.json",
+    "importPath": "@/components/effects/numeric-tunnel",
+    "target": "src/components/effects/numeric-tunnel"
+  },
+  {
+    "name": "stack-loader",
+    "title": "Stack Loader",
+    "category": "loaders",
+    "type": "registry:component",
+    "registryPath": "registry/effects/loaders/stack-loader/registry.json",
+    "importPath": "@/components/effects/stack-loader",
+    "target": "src/components/effects/stack-loader"
+  },
+  {
+    "name": "directional-menu",
+    "title": "Directional Menu",
+    "category": "navigation",
+    "type": "registry:component",
+    "registryPath": "registry/effects/navigation/directional-menu/registry.json",
+    "importPath": "@/components/effects/directional-menu",
+    "target": "src/components/effects/directional-menu"
+  },
+  {
+    "name": "elevate-navbar",
+    "title": "Elevate Navbar",
+    "category": "navigation",
+    "type": "registry:component",
+    "registryPath": "registry/effects/navigation/elevate-navbar/registry.json",
+    "importPath": "@/components/effects/elevate-navbar",
+    "target": "src/components/effects/elevate-navbar"
+  },
+  {
+    "name": "immersive-full-screen-nav",
+    "title": "Immersive Full Screen Navigation",
+    "category": "navigation",
+    "type": "registry:component",
+    "registryPath": "registry/effects/navigation/immersive-full-screen-nav/registry.json",
+    "importPath": "@/components/effects/immersive-full-screen-nav",
+    "target": "src/components/effects/immersive-full-screen-nav"
+  },
+  {
+    "name": "gooey-counter",
+    "title": "Gooey Counter",
+    "category": "components",
+    "type": "registry:component",
+    "registryPath": "registry/effects/components/gooey-counter/registry.json",
+    "importPath": "@/components/effects/gooey-counter",
+    "target": "src/components/effects/gooey-counter"
+  },
+  {
+    "name": "interactive-list-preview",
+    "title": "Interactive List Preview",
+    "category": "components",
+    "type": "registry:component",
+    "registryPath": "registry/effects/components/interactive-list-preview/registry.json",
+    "importPath": "@/components/effects/interactive-list-preview",
+    "target": "src/components/effects/interactive-list-preview"
+  },
+  {
+    "name": "circular-split-roll",
+    "title": "Circular Split Roll",
+    "category": "scroll",
+    "type": "registry:component",
+    "registryPath": "registry/effects/scroll/circular-split-roll/registry.json",
+    "importPath": "@/components/effects/circular-split-roll",
+    "target": "src/components/effects/circular-split-roll"
+  },
+  {
+    "name": "horizontal-feature-reveal",
+    "title": "Horizontal Feature Reveal",
+    "category": "scroll",
+    "type": "registry:component",
+    "registryPath": "registry/effects/scroll/horizontal-feature-reveal/registry.json",
+    "importPath": "@/components/effects/horizontal-feature-reveal",
+    "target": "src/components/effects/horizontal-feature-reveal"
+  },
+  {
+    "name": "infinite-perspective-slider",
+    "title": "Infinite Perspective Slider",
+    "category": "scroll",
+    "type": "registry:component",
+    "registryPath": "registry/effects/scroll/infinite-perspective-slider/registry.json",
+    "importPath": "@/components/effects/infinite-perspective-slider",
+    "target": "src/components/effects/infinite-perspective-slider"
+  },
+  {
+    "name": "rotation-slider",
+    "title": "Rotation Slider",
+    "category": "scroll",
+    "type": "registry:component",
+    "registryPath": "registry/effects/scroll/rotation-slider/registry.json",
+    "importPath": "@/components/effects/rotation-slider",
+    "target": "src/components/effects/rotation-slider"
+  },
+  {
+    "name": "split-canvas",
+    "title": "Split Canvas",
+    "category": "scroll",
+    "type": "registry:component",
+    "registryPath": "registry/effects/scroll/split-canvas/registry.json",
+    "importPath": "@/components/effects/split-canvas",
+    "target": "src/components/effects/split-canvas"
+  },
+  {
+    "name": "stack-spread",
+    "title": "Stack Spread",
+    "category": "scroll",
+    "type": "registry:component",
+    "registryPath": "registry/effects/scroll/stack-spread/registry.json",
+    "importPath": "@/components/effects/stack-spread",
+    "target": "src/components/effects/stack-spread"
+  },
+  {
+    "name": "sticky-content-wrapper",
+    "title": "Sticky Content Wrapper",
+    "category": "scroll",
+    "type": "registry:component",
+    "registryPath": "registry/effects/scroll/sticky-content-wrapper/registry.json",
+    "importPath": "@/components/effects/sticky-content-wrapper",
+    "target": "src/components/effects/sticky-content-wrapper"
+  },
+  {
+    "name": "text-convergence",
+    "title": "Text Convergence",
+    "category": "scroll",
+    "type": "registry:component",
+    "registryPath": "registry/effects/scroll/text-convergence/registry.json",
+    "importPath": "@/components/effects/text-convergence",
+    "target": "src/components/effects/text-convergence"
+  },
+  {
+    "name": "number-counter",
+    "title": "Number Counter",
+    "category": "text",
+    "type": "registry:component",
+    "registryPath": "registry/effects/text/number-counter/registry.json",
+    "importPath": "@/components/effects/number-counter",
+    "target": "src/components/effects/number-counter"
+  },
+  {
+    "name": "rectangular-text-reveal",
+    "title": "Rectangular Text Reveal",
+    "category": "text",
+    "type": "registry:component",
+    "registryPath": "registry/effects/text/rectangular-text-reveal/registry.json",
+    "importPath": "@/components/effects/rectangular-text-reveal",
+    "target": "src/components/effects/rectangular-text-reveal"
+  },
+  {
+    "name": "chromatic-text",
+    "title": "Chromatic Text",
+    "category": "text",
+    "type": "registry:component",
+    "registryPath": "registry/effects/text/chromatic-text/registry.json",
+    "importPath": "@/components/effects/chromatic-text",
+    "target": "src/components/effects/chromatic-text"
+  },
+  {
+    "name": "depth-flip-text",
+    "title": "Depth Flip Text",
+    "category": "text",
+    "type": "registry:component",
+    "registryPath": "registry/effects/text/depth-flip-text/registry.json",
+    "importPath": "@/components/effects/depth-flip-text",
+    "target": "src/components/effects/depth-flip-text"
+  },
+  {
+    "name": "drop-text",
+    "title": "Drop Text",
+    "category": "text",
+    "type": "registry:component",
+    "registryPath": "registry/effects/text/drop-text/registry.json",
+    "importPath": "@/components/effects/drop-text",
+    "target": "src/components/effects/drop-text"
+  },
+  {
+    "name": "flickering-text",
+    "title": "Flickering Text",
+    "category": "text",
+    "type": "registry:component",
+    "registryPath": "registry/effects/text/flickering-text/registry.json",
+    "importPath": "@/components/effects/flickering-text",
+    "target": "src/components/effects/flickering-text"
+  },
+  {
+    "name": "focus-text",
+    "title": "Focus Text",
+    "category": "text",
+    "type": "registry:component",
+    "registryPath": "registry/effects/text/focus-text/registry.json",
+    "importPath": "@/components/effects/focus-text",
+    "target": "src/components/effects/focus-text"
+  },
+  {
+    "name": "glowing-text",
+    "title": "Glowing Text",
+    "category": "text",
+    "type": "registry:component",
+    "registryPath": "registry/effects/text/glowing-text/registry.json",
+    "importPath": "@/components/effects/glowing-text",
+    "target": "src/components/effects/glowing-text"
+  },
+  {
+    "name": "pixel-text-fill",
+    "title": "Pixel Text Fill",
+    "category": "text",
+    "type": "registry:component",
+    "registryPath": "registry/effects/text/pixel-text-fill/registry.json",
+    "importPath": "@/components/effects/pixel-text-fill",
+    "target": "src/components/effects/pixel-text-fill"
+  },
+  {
+    "name": "rolling-text",
+    "title": "Rolling Text",
+    "category": "text",
+    "type": "registry:component",
+    "registryPath": "registry/effects/text/rolling-text/registry.json",
+    "importPath": "@/components/effects/rolling-text",
+    "target": "src/components/effects/rolling-text"
+  },
+  {
+    "name": "typing-text",
+    "title": "Typing Text",
+    "category": "text",
+    "type": "registry:component",
+    "registryPath": "registry/effects/text/typing-text/registry.json",
+    "importPath": "@/components/effects/typing-text",
+    "target": "src/components/effects/typing-text"
+  },
+  {
+    "name": "variable-text-proximity",
+    "title": "Variable Hover",
+    "category": "text",
+    "type": "registry:component",
+    "registryPath": "registry/effects/text/variable-text-proximity/registry.json",
+    "importPath": "@/components/effects/variable-text-proximity",
+    "target": "src/components/effects/variable-text-proximity"
+  },
+  {
+    "name": "chess-grid-transition",
+    "title": "Chess Grid Transition",
+    "category": "transitions",
+    "type": "registry:component",
+    "registryPath": "registry/effects/transitions/chess-grid-transition/registry.json",
+    "importPath": "@/components/effects/chess-grid-transition",
+    "target": "src/components/effects/chess-grid-transition"
+  },
+  {
+    "name": "block-transition",
+    "title": "Block Transition",
+    "category": "transitions",
+    "type": "registry:component",
+    "registryPath": "registry/effects/transitions/block-transition/registry.json",
+    "importPath": "@/components/effects/block-transition",
+    "target": "src/components/effects/block-transition"
+  },
+  {
+    "name": "fractal-glass",
+    "title": "Fractal Glass",
+    "category": "webgl",
+    "type": "registry:component",
+    "registryPath": "registry/effects/webgl/fractal-glass/registry.json",
+    "importPath": "@/components/effects/fractal-glass",
+    "target": "src/components/effects/fractal-glass"
+  },
+  {
+    "name": "interactive-blur-reveal",
+    "title": "Interactive Blur Reveal",
+    "category": "webgl",
+    "type": "registry:component",
+    "registryPath": "registry/effects/webgl/interactive-blur-reveal/registry.json",
+    "importPath": "@/components/effects/interactive-blur-reveal",
+    "target": "src/components/effects/interactive-blur-reveal"
+  },
+  {
+    "name": "milky-way",
+    "title": "Milky Way",
+    "category": "webgl",
+    "type": "registry:component",
+    "registryPath": "registry/effects/webgl/milky-way/registry.json",
+    "importPath": "@/components/effects/milky-way",
+    "target": "src/components/effects/milky-way"
+  }
+]

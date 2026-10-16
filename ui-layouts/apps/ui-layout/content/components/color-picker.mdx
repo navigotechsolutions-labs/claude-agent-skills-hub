@@ -1,0 +1,88 @@
+export const metadata = {
+  title: "Color Picker",
+  description: "An interactive color picker component built with React Colorful, featuring RGB, HSV, and hex color support. Includes color panel selection, hue slider, hex input field, clipboard integration, and eyedropper tool for precise color selection.",
+  keywords: [
+    "Color picker component",
+    "React colorful",
+    "Interactive color picker",
+    "RGB color picker",
+    "HSV color picker",
+    "Hex color picker",
+    "Color panel selector",
+    "Hue slider component",
+    "Color input field",
+    "Eyedropper tool",
+    "Clipboard color integration",
+    "React color picker",
+    "Color selector component",
+    "Color wheel picker",
+    "Color palette picker",
+    "React-colorful library",
+    "Color picker widget",
+    "Hex color input",
+    "Color value converter",
+    "Interactive color selection",
+    "Modern color picker",
+    "Responsive color picker",
+    "Color picker UI",
+    "Color selection tool",
+    "Advanced color picker",
+    "Custom color picker",
+    "Color picker interface",
+    "Color management tool",
+    "Web color picker",
+    "Tailwind color picker"
+  ],
+};
+
+<ComponentCodePreview name='default-color-picker' isFitheight />
+
+This interactive color picker component demonstrates advanced color selection with React Colorful integration, perfect for design tools, theme customizers, and web applications requiring precise color management.
+
+## Raws
+
+<ComponentCodePreview name='raws-color-picker' isFitheight />
+
+The raw color picker implementation provides essential color selection functionality with RGB, HSV, and hex support, ideal for developers seeking lightweight color picker solutions.
+
+## Installation
+
+<Tabs defaultValue="cli">
+
+<TabsList className='border-b w-full bg-muted justify-start h-12 mt-4'>
+  <TabsTrigger value='cli' className="data-[state=active]:bg-card gap-1 data-[state=active]:border">CLI</TabsTrigger>
+  <TabsTrigger value='manual' className="data-[state=active]:bg-card gap-1 data-[state=active]:border">Manual</TabsTrigger>
+</TabsList>
+
+  <TabsContent value="cli">
+   <CodeTabsMdx>
+      ```bash
+      npx uilayouts@latest add color-picker
+      ```
+
+      ```bash
+      npx shadcn@latest add 'https://www.ui-layouts.com/r/color-picker.json'
+      ```
+
+   </CodeTabsMdx>
+  </TabsContent>
+  
+  <TabsContent value="manual" manualType>
+```bash
+npm install react-colorful
+```
+
+<CodeSnippets name="color-picker" />
+
+</TabsContent>
+</Tabs>
+
+## Props
+
+| Props           | Type                      | Default | Description                               |
+| --------------- | ------------------------- | ------- | ----------------------------------------- |
+| `color`         | `string`                  | —       | The current color value.                  |
+| `onChange`      | `(color: string) => void` | —       | Callback fired when the color is changed. |
+| `label`         | `string`                  | —       | Label displayed above the color picker.   |
+| `isEyeDroppper` | `boolean`                 | `false` | Whether to enable the eyedropper feature. |
+| `className`     | `string`                  | `false` | Whether to enable the eyedropper feature. |

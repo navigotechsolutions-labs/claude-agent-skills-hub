@@ -1,0 +1,74 @@
+export const metadata = {
+  title: 'Code Tabs',
+  description:
+    'Tabbed code snippets component with multi-language support and syntax highlighting for React applications. Perfect for documentation, tutorials, and code examples that need to show different languages or variations with smooth transitions.',
+  keywords: [
+    'Code tabs component',
+    'Tabbed code',
+    'Multi-language code',
+    'Code snippets',
+    'Syntax highlighting tabs',
+    'Code comparison',
+    'Language tabs',
+    'Code organization',
+    'Tabbed interface',
+    'React code tabs',
+    'Multi-language syntax highlighting',
+    'Code snippet tabs',
+    'Tabbed code display',
+    'Language switching',
+    'Code comparison tool',
+    'Syntax highlighter tabs',
+    'React tabbed code',
+    'Multi-language code display',
+    'Code snippet viewer',
+    'Tabbed interface code',
+    'Language selector code',
+    'Code organization tabs',
+    'Interactive code tabs',
+    'Code presentation tabs',
+    'Multi-language support',
+    'Code snippet component',
+    'Tabbed code viewer',
+    'React code component',
+    'Syntax highlighting component',
+    'Code display tabs',
+    'Language switching component',
+    'Code comparison interface',
+  ],
+};
+
+<ComponentCodePreview name='code-tabs' jsonName='code-tabs' isFitheight />;
+
+## Installation
+
+<Tabs defaultValue="cli">
+
+<TabsList className='border-b w-full bg-muted justify-start h-12 mt-4'>
+  <TabsTrigger value='cli' className="data-[state=active]:bg-card gap-1 data-[state=active]:border">CLI</TabsTrigger>
+  <TabsTrigger value='manual' className="data-[state=active]:bg-card gap-1 data-[state=active]:border">Manual</TabsTrigger>
+</TabsList>
+
+  <TabsContent value="cli">
+   <CodeTabsMdx>
+      ```bash
+      npx uilayouts@latest add code-tabs
+      ```
+
+      ```bash
+      npx shadcn@latest add 'https://www.ui-layouts.com/r/code-tabs.json'
+      ```
+
+   </CodeTabsMdx>
+  </TabsContent>
+  
+  <TabsContent value="manual" manualType>
+  
+   ```bash
+      npm install shiki
+   ```
+
+ <CodeSnippets name="code-tabs" />
+
+  </TabsContent>
+</Tabs>

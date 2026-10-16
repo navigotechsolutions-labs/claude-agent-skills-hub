@@ -1,0 +1,120 @@
+export const metadata = {
+  title: "Animated Beam",
+  description: "An animated beam of light component that travels along a path with smooth animations. Perfect for showcasing website integration features, connection flows, and interactive visual effects. Built with React, TypeScript, and Tailwind CSS.",
+  keywords: [
+    "Animated beam component",
+    "React animated beam",
+    "CSS beam animation",
+    "Light beam effect",
+    "Path animation",
+    "Integration showcase",
+    "Visual effects component",
+    "Animated connections",
+    "Interactive beam",
+    "UI animations",
+    "Motion graphics",
+    "React animations",
+    "Tailwind CSS animations",
+    "Web animations",
+    "Modern UI effects",
+    "Connection visualization",
+    "Beam transition",
+    "Animated pathways",
+    "Visual integration",
+    "Interactive components"
+  ],
+};
+
+<ComponentCodePreview name='animated-beam-default' hasReTrigger isFitheight />
+
+## Installation
+
+<Tabs defaultValue="cli">
+
+<TabsList className='border-b w-full bg-muted justify-start h-12 mt-4'>
+  <TabsTrigger value='cli' className="data-[state=active]:bg-card gap-1 data-[state=active]:border">CLI</TabsTrigger>
+  <TabsTrigger value='manual' className="data-[state=active]:bg-card gap-1 data-[state=active]:border">Manual</TabsTrigger>
+</TabsList>
+
+  <TabsContent value="cli">
+   <CodeTabsMdx>
+      ```bash
+      npx uilayouts@latest add animated-beam
+      ```
+
+      ```bash
+      npx shadcn@latest add 'https://www.ui-layouts.com/r/animated-beam.json'
+      ```
+
+   </CodeTabsMdx>
+  </TabsContent>
+  
+  <TabsContent value="manual" manualType>
+
+```bash
+npm install motion
+```
+
+<CodeSnippets name="animated-beam" />
+
+</TabsContent>
+</Tabs>
+
+
+## Props
+
+| Prop               | Type      | Description                                              | Default      |
+| ------------------ | --------- | -------------------------------------------------------- | ------------ |
+| className          | string    | The class name for the SVG element.                      | -            |
+| containerRef       | RefObject | The ref for the container element.                       | -            |
+| fromRef            | RefObject | The ref of the element from which the beam should start. | -            |
+| toRef              | RefObject | The ref of the element to which the beam should end.     | -            |
+| curvature          | number    | The curvature of the beam.                               | 0            |
+| reverse            | boolean   | Whether the beam should be reversed.                     | false        |
+| duration           | number    | The duration of the beam animation.                      | Random (4-7) |
+| delay              | number    | The delay before the beam animation starts.              | 0            |
+| pathColor          | string    | The color of the beam path.                              | "gray"       |
+| pathWidth          | number    | The width of the beam path.                              | 2            |
+| pathOpacity        | number    | The opacity of the beam path.                            | 0.2          |
+| gradientStartColor | string    | The start color of the gradient for the beam.            | "#4d40ff"    |
+| gradientStopColor  | string    | The stop color of the gradient for the beam.             | "#4043ff"    |
+| startXOffset       | number    | The x offset of the beam's start position.               | 0            |
+| startYOffset       | number    | The y offset of the beam's start position.               | 0            |
+| endXOffset         | number    | The x offset of the beam's end position.                 | 0            |
+| endYOffset         | number    | The y offset of the beam's end position.                 | 0            |
+| dotted             | boolean   | Whether the beam should be dotted.                       | false        |
+| dotSpacing         | number    | The spacing between dots if the beam is dotted.          | 6            |
+
+## Example
+
+### Bidrectional
+
+<ComponentCodePreview
+  name='animated-beam-bidirectional'
+  hasReTrigger
+  isFitheight
+/>
+
+### Unidrectional
+
+<ComponentCodePreview
+  name='animated-beam-unidirectional'
+  hasReTrigger
+  isFitheight
+/>
+
+### Multiple Input
+
+<ComponentCodePreview
+  name='animated-beam-multiple-input'
+  hasReTrigger
+  isFitheight
+/>
+
+### Multiple Output
+
+<ComponentCodePreview
+  name='animated-beam-multiple-output'
+  hasReTrigger
+  isFitheight
+/>

@@ -1,0 +1,97 @@
+export const metadata = {
+  title: "Datetime Picker",
+  description: "A comprehensive datetime picker component built on top of shadcn-ui with no additional libraries required. Features date and time selection, calendar interface, and smart datetime input for modern web applications.",
+  keywords: [
+    "Datetime picker component",
+    "Shadcn-ui datetime picker",
+    "React datetime picker",
+    "Date time selector",
+    "Calendar picker",
+    "Time picker component",
+    "Date picker component",
+    "Smart datetime input",
+    "Shadcn datetime",
+    "No library datetime picker",
+    "Built-in datetime picker",
+    "React date picker",
+    "Interactive calendar",
+    "Time selection component",
+    "Date selection component",
+    "Modern datetime picker",
+    "Responsive datetime picker",
+    "Calendar component",
+    "DateTime input field",
+    "Date time interface",
+    "Calendar widget",
+    "Time input component",
+    "Native datetime picker",
+    "Custom datetime picker",
+    "UI datetime component",
+    "Form datetime picker",
+    "Accessible datetime picker",
+    "Lightweight datetime picker",
+    "Shadcn components",
+    "Tailwind datetime picker"
+  ],
+};
+
+> Thanks to [Yerfa](https://shadcn-extension.vercel.app/docs/smart-datetime-input)
+
+<ComponentCodePreview name='datetime-picke-default' isFitheight hasReTrigger />
+
+## Installation
+
+<Tabs defaultValue="cli">
+
+<TabsList className='border-b w-full bg-muted justify-start h-12 mt-4'>
+  <TabsTrigger value='cli' className="data-[state=active]:bg-card gap-1 data-[state=active]:border">CLI</TabsTrigger>
+  <TabsTrigger value='manual' className="data-[state=active]:bg-card gap-1 data-[state=active]:border">Manual</TabsTrigger>
+</TabsList>
+
+  <TabsContent value="cli">
+   <CodeTabsMdx>
+      ```bash
+      npx uilayouts@latest add datetime-input
+      ```
+
+      ```bash
+      npx shadcn@latest add 'https://www.ui-layouts.com/r/datetime-input.json'
+      ```
+
+   </CodeTabsMdx>
+  </TabsContent>
+  
+  <TabsContent value="manual" manualType>
+
+```bash
+npm install chrono-node react-day-picker@^8.9.1
+```
+
+<CodeSnippets name="datetime-input" />
+
+</TabsContent>
+</Tabs>
+
+## Props
+
+| Prop             | Type                   | Default     | Description                                              |
+| ---------------- | ---------------------- | ----------- | -------------------------------------------------------- |
+| `value`          | `Date`                 | `undefined` | The selected date value for the input.                   |
+| `onValueChange`  | `(date: Date) => void` | `-`         | Callback function triggered when the date value changes. |
+| `showCalendar`   | `boolean`              | `true`      | Whether to display a calendar for date selection.        |
+| `showTimePicker` | `boolean`              | `true`      | Whether to display a time picker for time selection.     |
+| `className`      | `string`               | `undefined` | Additional CSS class names to style the input component. |
+| `placeholder`    | `string`               | `undefined` | Placeholder text displayed when no value is selected.    |
+| `disabled`       | `boolean`              | `undefined` | Whether the input is disabled and not interactive.       |
+
+
+## Example
+
+### Time Picker
+
+<ComponentCodePreview name='time-picker' isFitheight hasReTrigger />
+
+### Date Picker
+
+<ComponentCodePreview name='date-picker' isFitheight hasReTrigger />
+

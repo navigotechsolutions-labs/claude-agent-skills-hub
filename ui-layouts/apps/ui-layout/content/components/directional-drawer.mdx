@@ -1,0 +1,85 @@
+export const metadata = {
+  title: "Directional Drawer",
+  description:
+    "A Responsive multi Directional/Sliding Drawer component for React with Vaul. Functions as a collapsible navigation drawer on mobile and a persistent sidebar on desktop.",
+  keywords: [
+    "Responsive sidebar React",
+    "vaul sidebar",
+    "Animated sidebar component",
+    "React navigation drawer",
+    "Collapsible sidebar UI",
+    "Responsive drawer React",
+    "Sidebar with motion effects",
+    "React animated sidebar",
+    "Mobile sidebar navigation",
+    "Desktop sidebar component",
+    "vaul navigation drawer",
+    "Interactive sidebar React",
+    "Responsive layout sidebar",
+    "React sidebar with animation",
+    "Collapsible navigation panel",
+    "Drawer style sidebar",
+    "Accessible sidebar UI",
+    "React motion sidebar",
+    "Sidebar for dashboards",
+    "Modern UI sidebar",
+  ],
+};
+
+<ComponentCodePreview name='directional-drawer-default' hasReTrigger responsive />
+
+
+## Installation
+
+<Tabs defaultValue="cli">
+
+  <TabsList className='border-b w-full bg-muted justify-start h-12 mt-4'>
+    <TabsTrigger value="cli" className="data-[state=active]:bg-card gap-1 data-[state=active]:border">CLI</TabsTrigger>
+    <TabsTrigger value="manual" className="data-[state=active]:bg-card gap-1 data-[state=active]:border">Manual</TabsTrigger>
+  </TabsList>
+
+  <TabsContent value="cli">
+   <CodeTabsMdx>
+      ```bash
+      npx uilayouts@latest add directional-drawer
+      ```
+
+      ```bash
+      npx shadcn@latest add 'https://www.ui-layouts.com/r/directional-drawer.json'
+      ```
+   </CodeTabsMdx>
+  </TabsContent>
+
+
+<TabsContent value="manual" manualType>
+
+```bash
+npm install vaul
+```
+
+<CodeSnippets name="directional-drawer" />
+
+</TabsContent>
+</Tabs>
+
+## Props
+
+| Prop      | Type     | Description                                                                                    |
+| --------- | -------- | :--------------------------------------------------------------------------------------------- |
+| open      | boolean  | The content to be displayed within the AuroraBackground component.                             |
+| setOpen   | boolean  | this is an function to close and open the drawer                                               |
+| drawerBtn | function | this is an function for default button, when you don't to use state then you can use drawerBtn |
+
+## Example
+
+### Left Sidebar
+
+<ComponentCodePreview name='left-directional-drawer' hasReTrigger responsive />
+
+### Top Sidebar
+
+<ComponentCodePreview name='top-directional-drawer' hasReTrigger responsive />
+
+### Bottom Sidebar
+
+<ComponentCodePreview name='bottom-directional-drawer' hasReTrigger responsive />

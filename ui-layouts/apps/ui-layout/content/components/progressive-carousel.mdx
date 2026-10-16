@@ -1,0 +1,77 @@
+export const metadata = {
+  title: "Progressive Carousel ",
+  description:
+    "An animated progressive carousel component built with Framer Motion. Features smooth, dynamic transitions between items for a modern and engaging user experience.",
+  keywords: [
+    "Progressive carousel component",
+    "Framer Motion carousel",
+    "React animated carousel",
+    "Carousel with smooth transitions",
+    "Dynamic item slider",
+    "React motion carousel",
+    "Animated carousel UI",
+    "Modern carousel component",
+    "Framer Motion slider",
+    "React carousel animation",
+    "Carousel with framer effects",
+    "Interactive carousel design",
+    "React progressive carousel",
+    "UI carousel transitions",
+    "Custom carousel React",
+    "Carousel animation effect",
+    "Framer Motion UI component",
+    "Dynamic carousel layout",
+    "Animated item slider",
+    "Carousel with motion effects",
+  ],
+};
+
+
+<ComponentCodePreview name='horizontal-progressive-carousel' hasReTrigger />
+## Installation
+
+<Tabs defaultValue="cli">
+
+<TabsList className='border-b w-full bg-muted justify-start h-12 mt-4'>
+  <TabsTrigger value='cli' className="data-[state=active]:bg-card gap-1 data-[state=active]:border">CLI</TabsTrigger>
+  <TabsTrigger value='manual' className="data-[state=active]:bg-card gap-1 data-[state=active]:border">Manual</TabsTrigger>
+</TabsList>
+
+  <TabsContent value="cli">
+   <CodeTabsMdx>
+      ```bash
+      npx uilayouts@latest add progressive-carousel
+      ```
+
+      ```bash
+      npx shadcn@latest add 'https://www.ui-layouts.com/r/progressive-carousel.json'
+      ```
+
+   </CodeTabsMdx>
+  </TabsContent>
+  
+  <TabsContent value="manual" manualType>
+  
+```bash
+npm install motion
+```
+
+<CodeSnippets name="progressive-carousel" />
+
+</TabsContent>
+</Tabs>
+
+## Props
+
+| Prop         | Type      | Default | Description                                                   |
+| ------------ | --------- | ------- | ------------------------------------------------------------- |
+| children     | ReactNode |         | The content to be displayed within the slider.                |
+| duration     | number    | 5000    | The duration of the slider's transition in milliseconds.      |
+| fastDuration | number    | 400     | The duration of the slider's fast transition in milliseconds. |
+| vertical     | boolean   | false   | Whether the slider is oriented vertically.                    |
+| activeSlider | string    |         | The identifier of the currently active slider.                |
+| className    | string    |         | Optional CSS class for styling the slider component.          |
+
+## Example
+
+<ComponentCodePreview name='vertical-progressive-carousel' hasReTrigger />

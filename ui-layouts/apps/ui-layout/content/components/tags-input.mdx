@@ -1,0 +1,71 @@
+export const metadata = {
+  title: "Tags Input",
+  description:
+    "A YouTube/GitHub-style tags input for React with chip UI, keyboard shortcuts (Enter/Comma/Backspace), paste-to-chips, and optional autocomplete. Accessible and customizable for modern forms.",
+  keywords: [
+    "Tags input React",
+    "YouTube style tags",
+    "GitHub tags input",
+    "React chip input",
+    "Tag field component",
+    "Tagging UI React",
+    "Autocomplete tags",
+    "Tokenized input",
+    "Chips input component",
+    "Multi-value input React",
+    "Pill tags UI",
+    "Keyboard tags input",
+    "Paste to tags",
+    "Removable chips React",
+    "Accessible tag input",
+    "Form tags component",
+    "Searchable tags React",
+    "Tag editor UI",
+    "React tokens input",
+    "Modern tags component",
+  ],
+};
+
+
+<ComponentCodePreview name='tags-input' isFitheight hasReTrigger jsonName="tags-input-components" />
+
+## Tags WithEdit
+
+<ComponentCodePreview name='tagsedit-false' isFitheight hasReTrigger jsonName="tags-input-no-edit" />
+
+## Installation
+
+<Tabs defaultValue="cli">
+
+<TabsList className='border-b w-full bg-muted justify-start h-12 mt-4'>
+  <TabsTrigger value='cli' className="data-[state=active]:bg-card gap-1 data-[state=active]:border">CLI</TabsTrigger>
+  <TabsTrigger value='manual' className="data-[state=active]:bg-card gap-1 data-[state=active]:border">Manual</TabsTrigger>
+</TabsList>
+
+  <TabsContent value="cli">
+   <CodeTabsMdx>
+      ```bash
+      npx uilayouts@latest add tags-input
+      ```
+
+      ```bash
+      npx shadcn@latest add 'https://www.ui-layouts.com/r/tags-input.json'
+      ```
+
+   </CodeTabsMdx>
+  </TabsContent>
+  
+<TabsContent value="manual" manualType>
+
+<CodeSnippets name="tags-input" />
+
+</TabsContent>
+</Tabs>
+
+## Props
+
+| Prop      | Type                                             | Default | Description                                                                          |
+| --------- | ------------------------------------------------ | ------- | ------------------------------------------------------------------------------------ |
+| `tags`    | `string[]`                                       | `[]`    | Array of strings representing the tags to display in the input.                      |
+| `setTags` | `React.Dispatch<React.SetStateAction<string[]>>` | `-`     | Function to update the tags array, typically used with a `useState` hook.            |
+| `editTag` | `boolean`                                        | `true`  | Optional flag that enables or disables the ability to edit tags in the input compone |

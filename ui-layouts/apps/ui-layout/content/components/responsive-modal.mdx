@@ -1,0 +1,90 @@
+export const metadata = {
+  title: "Responsive Modal",
+  description:
+    "A responsive Modal component built with Vaul and Framer Motion. Opens like an app drawer on mobile devices and functions as a dialog or sliding panel on desktop.",
+  keywords: [
+    "Modal component",
+    "Responsive Modal React",
+    "Vaul Modal",
+    "Framer Motion drawer",
+    "React sliding panel",
+    "Mobile app drawer UI",
+    "React dialog drawer",
+    "Animated drawer component",
+    "Vaul motion drawer",
+    "Responsive sidebar React",
+    "Drawer with animation",
+    "React UI drawer",
+    "Dialog with slide animation",
+    "App style drawer",
+    "React bottom drawer",
+    "Framer Motion UI component",
+    "Accessible drawer React",
+    "Responsive navigation drawer",
+    "Interactive drawer UI",
+    "React motion drawer",
+  ],
+};
+
+
+<ComponentCodePreview name='responsive-modal-default' hasReTrigger responsive />
+
+## Installation
+
+<Tabs defaultValue="cli">
+
+  <TabsList className='border-b w-full bg-muted justify-start h-12 mt-4'>
+    <TabsTrigger value="cli" className="data-[state=active]:bg-card gap-1 data-[state=active]:border">CLI</TabsTrigger>
+    <TabsTrigger value="manual" className="data-[state=active]:bg-card gap-1 data-[state=active]:border">Manual</TabsTrigger>
+  </TabsList>
+
+  <TabsContent value="cli">
+   <CodeTabsMdx>
+      ```bash
+      npx uilayouts@latest add responsive-modal
+      ```
+
+      ```bash
+      npx shadcn@latest add 'https://www.ui-layouts.com/r/responsive-modal.json'
+      ```
+   </CodeTabsMdx>
+  </TabsContent>
+
+
+<TabsContent value="manual" manualType>
+```bash
+npm install motion vaul
+```
+
+<CodeSnippets name="responsive-modal" />
+
+</TabsContent>
+</Tabs>
+
+
+Please add this property in your layout.tsx or app.tsx
+
+```tsx
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang='en'>
+      <body className={poppins.className}>
+        <div vaul-drawer-wrapper=''>{children}</div>
+      </body>
+    </html>
+  );
+}
+```
+
+## Props
+
+| Prop           | Type      | Description                                                        |
+| -------------- | --------- | :----------------------------------------------------------------- |
+| open           | boolean   | The content to be displayed within the AuroraBackground component. |
+| setOpen        | boolean   | this is an function to close and open the drawer                   |
+| triggerContent | ReactNode | This will use for default click without an using state             |
+

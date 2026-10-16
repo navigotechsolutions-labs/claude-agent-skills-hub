@@ -1,0 +1,73 @@
+export const metadata = {
+  title: "Scroll Text",
+  description:
+    "A text marquee animation component for React with support for unidirectional and bidirectional scrolling. Dynamically changes direction based on scroll position for smooth, modern UI effects.",
+  keywords: [
+    "Scroll text component",
+    "React marquee text",
+    "Text scroll animation",
+    "Bidirectional text scroll",
+    "Unidirectional marquee",
+    "Scrolling text React",
+    "React text animation",
+    "Horizontal text scroll",
+    "Continuous text marquee",
+    "Framer Motion marquee",
+    "Text animation on scroll",
+    "Dynamic scroll direction",
+    "React marquee component",
+    "Auto scrolling text",
+    "Text ticker React",
+    "Animated marquee UI",
+    "Responsive text scroll",
+    "Modern marquee effect",
+    "React text scroller",
+    "UI layouts text animation",
+  ],
+};
+
+
+<ComponentCodePreview name='text-scroll-animation' hasReTrigger responsive />
+
+## Installation
+
+<Tabs defaultValue="cli">
+
+<TabsList className='border-b w-full bg-muted justify-start h-12 mt-4'>
+  <TabsTrigger value='cli' className="data-[state=active]:bg-card gap-1 data-[state=active]:border">CLI</TabsTrigger>
+  <TabsTrigger value='manual' className="data-[state=active]:bg-card gap-1 data-[state=active]:border">Manual</TabsTrigger>
+</TabsList>
+
+  <TabsContent value="cli">
+   <CodeTabsMdx>
+      ```bash
+      npx uilayouts@latest add scroll-text
+      ```
+
+      ```bash
+      npx shadcn@latest add 'https://www.ui-layouts.com/r/scroll-text.json'
+      ```
+
+   </CodeTabsMdx>
+  </TabsContent>
+  
+<TabsContent value="manual" manualType>
+
+```bash
+npm install motion
+```
+
+<CodeSnippets name="scroll-text" />
+
+</TabsContent>
+</Tabs>
+
+## Props
+
+| Prop            | Type    | Default | Description                                          |
+| --------------- | ------- | ------- | ---------------------------------------------------- |
+| children        | string  |         | The content to be animated with a parallax effect.   |
+| baseVelocity    | number  | `-5`    | The base velocity for the parallax effect.           |
+| clasname        | string  |         | Optional CSS class for styling the component.        |
+| scrollDependent | boolean | `false` | Whether the animation should depend on scroll.       |
+| delay           | number  | `0`     | Delay before the animation starts (in milliseconds). |

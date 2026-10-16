@@ -1,0 +1,69 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "pulse-text",
+  "title": "Pulse Text",
+  "description": "Rhythmic scale + opacity pulse — like a heartbeat.",
+  "files": [
+    {
+      "path": "registry/default/pulse-text/pulse-text.tsx",
+      "content": "import { type ElementType, type CSSProperties } from 'react';\nimport { cn } from '@/lib/utils';\n\nexport interface PulseTextProps {\n  children: React.ReactNode;\n  /** Cycle duration in ms. */\n  duration?: number;\n  /** Element tag. */\n  as?: ElementType;\n  className?: string;\n}\n\nexport function PulseText({\n  children,\n  duration = 1800,\n  as: Component = 'span',\n  className\n}: PulseTextProps) {\n  return (\n    <Component\n      className={cn('trickle-pulse-text relative inline-block animate-trickle-pulse-text', className)}\n      style={{\n        animationDuration: `${duration}ms`,\n        ['--trickle-pulse-duration' as string]: `${duration}ms`\n      } as CSSProperties}\n      data-trickle-pulse-rings='true'\n    >\n      {children}\n    </Component>\n  );\n}\n",
+      "type": "registry:ui",
+      "target": "components/trickle/pulse-text.tsx"
+    }
+  ],
+  "cssVars": {
+    "theme": {
+      "--animate-trickle-pulse-text": "trickle-pulse-text 1.8s ease-in-out infinite"
+    }
+  },
+  "css": {
+    ".trickle-pulse-text[data-trickle-pulse-rings='true']::before, .trickle-pulse-text[data-trickle-pulse-rings='true']::after": {
+      "content": "''",
+      "position": "absolute",
+      "inset": "-0.18em -0.4em",
+      "border": "1.5px solid currentColor",
+      "border-radius": "0.5em",
+      "pointer-events": "none",
+      "opacity": "0"
+    },
+    ".trickle-pulse-text[data-trickle-pulse-rings='true']::before": {
+      "animation": "trickle-pulse-ring var(--trickle-pulse-duration, 1800ms) cubic-bezier(0, 0, 0.4, 1) infinite"
+    },
+    ".trickle-pulse-text[data-trickle-pulse-rings='true']::after": {
+      "animation": "trickle-pulse-ring var(--trickle-pulse-duration, 1800ms) cubic-bezier(0, 0, 0.4, 1) infinite",
+      "animation-delay": "calc(var(--trickle-pulse-duration, 1800ms) * 0.5)"
+    },
+    "@keyframes trickle-pulse-text": {
+      "0%, 100%": {
+        "transform": "scale(1)"
+      },
+      "50%": {
+        "transform": "scale(1.06)"
+      }
+    },
+    "@keyframes trickle-pulse-ring": {
+      "0%": {
+        "transform": "scale(0.85)",
+        "opacity": "0"
+      },
+      "18%": {
+        "opacity": "0.6"
+      },
+      "100%": {
+        "transform": "scale(1.6)",
+        "opacity": "0"
+      }
+    },
+    "@media (prefers-reduced-motion: reduce)": {
+      ".animate-trickle-pulse-text": {
+        "animation": "none",
+        "transform": "none",
+        "opacity": "1"
+      },
+      ".trickle-pulse-text[data-trickle-pulse-rings='true']::before, .trickle-pulse-text[data-trickle-pulse-rings='true']::after": {
+        "animation": "none"
+      }
+    }
+  },
+  "type": "registry:ui"
+}

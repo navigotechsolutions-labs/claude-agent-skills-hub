@@ -1,0 +1,68 @@
+export const metadata = {
+  title: "Background Blocks",
+  description: "A fully customizable grid component with active blocks for creating interactive layouts and dynamic backgrounds. Features responsive grid systems, hover effects, and customizable block animations. Perfect for modern web interfaces and engaging user experiences.",
+  keywords: [
+    "Background blocks component",
+    "Interactive grid system",
+    "Customizable grid blocks",
+    "Active blocks animation",
+    "React grid component",
+    "Dynamic background grid",
+    "Interactive layout blocks",
+    "Hover effect blocks",
+    "Responsive grid system",
+    "Animated grid blocks",
+    "UI grid component",
+    "Block-based layout",
+    "Interactive background",
+    "Grid animation effects",
+    "Customizable blocks",
+    "Modern grid design",
+    "Block hover effects",
+    "Dynamic grid layout",
+    "Interactive UI blocks",
+    "Tailwind CSS grid"
+  ],
+};
+
+<ComponentCodePreview name='bg-blocks-one' hasReTrigger isFitheight />
+
+## Installation
+
+<Tabs defaultValue="cli">
+  <TabsList className='border-b w-full bg-muted justify-start h-12 mt-4'>
+    <TabsTrigger value="cli" className="data-[state=active]:bg-card gap-1 data-[state=active]:border">CLI</TabsTrigger>
+    <TabsTrigger value="manual" className="data-[state=active]:bg-card gap-1 data-[state=active]:border">Manual</TabsTrigger>
+  </TabsList>
+  <TabsContent value="cli">
+   <CodeTabsMdx>
+      ```bash
+      npx uilayouts@latest add blocks
+      ```
+
+      ```bash
+      npx shadcn@latest add 'https://www.ui-layouts.com/r/blocks.json'
+      ```
+   </CodeTabsMdx>
+  </TabsContent>
+<TabsContent value="manual" manualType>
+
+```bash
+npm install motion
+```
+
+<CodeSnippets name="blocks" />
+
+</TabsContent>
+</Tabs>
+
+
+## Props
+
+| Prop            | Type                    | Default   | Description                                                                                          |
+| --------------- | ----------------------- | --------- | ---------------------------------------------------------------------------------------------------- |
+| activeDivsClass | string                  | undefined | The class name applied to active blocks.                                                             |
+| activeDivs      | Object with number keys | undefined | A mapping where each key is a column index and each value is a set of row indices for active blocks. |
+| divClass        | string                  | undefined | The class name applied to each block.                                                                |
+| classname       | string                  | undefined | Additional class name applied to the outer container.                                                |
+| containerRef    | React.RefObject         | undefined | A React ref object for the container element used to calculate dimensions.                           |

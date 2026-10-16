@@ -1,0 +1,92 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+# CLI-only. packages/mcp-server is intentionally NOT built/published here -
+# it changes rarely and is published by hand when it actually needs a new
+# version (`cd packages/mcp-server && npm publish`), rather than riding
+# along on every CLI version tag. This used to also gate/publish mcp-server,
+# which meant an unrelated CLI test failure (or an npm permissions gap on
+# hyperiux-mcp-server specifically - both hit in practice) could block a
+# CLI release that had nothing to do with either problem.
+
+jobs:
+  release:
+    name: Publish & Release
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run quality gates
+        run: |
+          pnpm lint
+          pnpm --filter hyperiux test
+
+      - name: Publish CLI with provenance
+        # Plain npm publish, not pnpm publish - pnpm's OIDC trusted-publishing
+        # support is currently broken on GitHub Actions (pnpm/pnpm#11513),
+        # while npm CLI's is GA. Upgrading npm first guarantees the >=11.5.1
+        # CLI version trusted publishing requires, regardless of whatever
+        # version happens to ship with the pinned Node version. NODE_AUTH_TOKEN
+        # stays wired as a fallback in case OIDC isn't picked up for any reason.
+        run: |
+          npm install -g npm@latest
+          cd packages/cli
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          # npm refuses to publish a prerelease (e.g. 1.1.0-beta.1) without an
+          # explicit --tag - it won't guess and risk landing it on "latest".
+          # Derive the dist-tag from the prerelease identifier itself (beta,
+          # rc, etc.); a plain version (no hyphen) falls through to "latest".
+          NPM_TAG=$(echo "$PKG_VERSION" | sed -n 's/^[^-]*-\([a-zA-Z]*\).*/\1/p')
+          NPM_TAG=${NPM_TAG:-latest}
+          if npm view "hyperiux@$PKG_VERSION" version &>/dev/null; then
+            echo "hyperiux@$PKG_VERSION is already published, skipping."
+          else
+            npm publish --provenance --access public --tag "$NPM_TAG"
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create or update GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # A tag like v1.1.0-beta.3 carries a prerelease identifier (the
+          # part after the first "-", same signal the npm dist-tag steps
+          # above use); a plain tag like v1.0.77 doesn't. Prereleases are
+          # marked as such rather than promoted to "Latest".
+          if [[ "${{ github.ref_name }}" == *-* ]]; then
+            RELEASE_FLAG="--prerelease"
+          else
+            RELEASE_FLAG="--latest"
+          fi
+
+          if gh release view "${{ github.ref_name }}" &>/dev/null; then
+            gh release edit "${{ github.ref_name }}" \
+              --title "${{ github.ref_name }}" \
+              $RELEASE_FLAG
+          else
+            gh release create "${{ github.ref_name }}" \
+              --title "${{ github.ref_name }}" \
+              --generate-notes \
+              $RELEASE_FLAG
+          fi

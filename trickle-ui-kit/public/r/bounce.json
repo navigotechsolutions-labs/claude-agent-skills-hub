@@ -1,0 +1,64 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "bounce",
+  "title": "Bounce",
+  "description": "Letters bounce in from above with overshoot physics. Per-char stagger.",
+  "files": [
+    {
+      "path": "registry/default/bounce/bounce.tsx",
+      "content": "import { type ElementType, type CSSProperties } from 'react';\nimport { cn } from '@/lib/utils';\n\nexport interface BounceProps {\n  text: string;\n  delay?: number;\n  stagger?: number;\n  as?: ElementType;\n  className?: string;\n}\n\nexport function Bounce({ text, delay = 0, stagger = 60, as: Component = 'span', className }: BounceProps) {\n  return (\n    <Component className={cn('inline-block', className)} aria-label={text}>\n      {text.split('').map((char, i) => (\n        <span\n          key={i}\n          aria-hidden='true'\n          className='inline-block whitespace-pre animate-trickle-bounce'\n          style={{ animationDelay: `${delay + i * stagger}ms` } as CSSProperties}\n        >\n          {char}\n        </span>\n      ))}\n    </Component>\n  );\n}\n",
+      "type": "registry:ui",
+      "target": "components/trickle/bounce.tsx"
+    }
+  ],
+  "cssVars": {
+    "theme": {
+      "--animate-trickle-bounce": "trickle-bounce 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) both"
+    }
+  },
+  "css": {
+    "@keyframes trickle-bounce": {
+      "0%": {
+        "opacity": "0",
+        "transform": "translateY(-1.4em) scale(0.7, 1.1)",
+        "animation-timing-function": "cubic-bezier(0.55, 0, 1, 0.45)"
+      },
+      "25%": {
+        "opacity": "1",
+        "transform": "translateY(0) scale(1.15, 0.85)",
+        "animation-timing-function": "cubic-bezier(0, 0.55, 0.45, 1)"
+      },
+      "45%": {
+        "transform": "translateY(-0.55em) scale(0.95, 1.05)",
+        "animation-timing-function": "cubic-bezier(0.55, 0, 1, 0.45)"
+      },
+      "60%": {
+        "transform": "translateY(0) scale(1.08, 0.92)",
+        "animation-timing-function": "cubic-bezier(0, 0.55, 0.45, 1)"
+      },
+      "75%": {
+        "transform": "translateY(-0.22em) scale(0.98, 1.02)",
+        "animation-timing-function": "cubic-bezier(0.55, 0, 1, 0.45)"
+      },
+      "85%": {
+        "transform": "translateY(0) scale(1.04, 0.96)",
+        "animation-timing-function": "cubic-bezier(0, 0.55, 0.45, 1)"
+      },
+      "93%": {
+        "transform": "translateY(-0.08em) scale(1, 1)"
+      },
+      "100%": {
+        "opacity": "1",
+        "transform": "translateY(0) scale(1, 1)"
+      }
+    },
+    "@media (prefers-reduced-motion: reduce)": {
+      ".animate-trickle-bounce": {
+        "animation": "none",
+        "opacity": "1",
+        "transform": "none"
+      }
+    }
+  },
+  "type": "registry:ui"
+}

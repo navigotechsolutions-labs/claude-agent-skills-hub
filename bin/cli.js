@@ -14,7 +14,17 @@ const SKILLS = [
   { name: 'codex', group: 'BUILD', desc: 'Runs Codex commands and synthesis inside Claude Code', dir: 'codex' },
   { name: 'i-have-adhd', group: 'BUILD', desc: 'Stops Claude from burying key answers under paragraphs', dir: 'i-have-adhd' },
 
-  // DESIGN
+  // DESIGN & FRONTEND AESTHETICS
+  { name: 'superdesign-skill', group: 'DESIGN', desc: 'System rules and prompt heuristics for modern UI/UX superdesigns', dir: 'superdesign-skill' },
+  { name: 'better-design', group: 'DESIGN', desc: 'Curated design guidelines, component best practices & anti-patterns', dir: 'better-design' },
+  { name: 'design-taste', group: 'DESIGN', desc: 'Aesthetic rules, font pairing, color harmony and layout elevation', dir: 'design-taste' },
+  { name: 'canvas-ui', group: 'DESIGN', desc: 'Component primitives and canvas-based interactive UI elements', dir: 'canvas-ui' },
+  { name: 'paper-shaders', group: 'DESIGN', desc: 'Paper design WebGL / GLSL shaders for tactile web surfaces', dir: 'paper-shaders' },
+  { name: 'ui-layouts', group: 'DESIGN', desc: 'Collection of modern responsive UI layouts and grid structures', dir: 'ui-layouts' },
+  { name: 'hyperiux-components', group: 'DESIGN', desc: 'Immersive spatial UI components, glassmorphism and 3D interactions', dir: 'hyperiux-components' },
+  { name: 'motion-primitives', group: 'DESIGN', desc: 'Advanced UI animation and motion primitives built on Framer Motion', dir: 'motion-primitives' },
+  { name: 'cursify', group: 'DESIGN', desc: 'Interactive custom cursor animations and hover effect harnesses', dir: 'cursify' },
+  { name: 'trickle-ui-kit', group: 'DESIGN', desc: 'Lightweight, modern UI kit components and design specifications', dir: 'trickle-ui-kit' },
   { name: 'ui-ux-pro-max', group: 'DESIGN', desc: 'Palettes, typography scales, spacing heuristics & UI design rules', dir: 'ui-ux-pro-max' },
   { name: 'taste-skill', group: 'DESIGN', desc: 'Injects aesthetic design principles & layout decisions', dir: 'taste-skill' },
   { name: 'impeccable', group: 'DESIGN', desc: 'Structured design language specifications & harnesses', dir: 'impeccable' },

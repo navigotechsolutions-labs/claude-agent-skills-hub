@@ -39,19 +39,29 @@ This hub integrates top-rated community skills and behavioral harnesses for Clau
 | **`codex`** | [`openai/codex-plugin-cc`](https://github.com/openai/codex-plugin-cc) | ⭐ 30k★ | Runs Codex commands and code synthesis natively inside Claude Code. |
 | **`i-have-adhd`** | [`ayghri/i-have-adhd`](https://github.com/ayghri/i-have-adhd) | ⭐ 9k★ | Stops Claude from burying key answers under paragraphs of explanation. |
 
-### 🎨 DESIGN
-| Skill | Repository / Source | Stars | Description & Capability |
-| :--- | :--- | :---: | :--- |
-| **`ui-ux-pro-max`** | [`nextlevelbuilder/ui-ux-pro-max-skill`](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) | ⭐ 109k★ | Palettes, typography scales, spacing heuristics, and proven design systems. |
-| **`taste-skill`** | [`leonxlnx/taste-skill`](https://github.com/leonxlnx/taste-skill) | ⭐ 66k★ | Injects aesthetic principles to make web interfaces look bespoke and expensive. |
-| **`impeccable`** | [`pbakaus/impeccable`](https://github.com/pbakaus/impeccable) | ⭐ 49k★ | The critical polish pass on any frontend (micro-interactions, alignment, layout). |
-| **`hyperframes`** | [`heygen-com/hyperframes`](https://github.com/heygen-com/hyperframes) | ⭐ 37k★ | Turns web pages and UI components into motion video animations. |
-| **`emil`** | [`emilkowalski/skills`](https://github.com/emilkowalski/skills) | ⭐ 20k★ | Emil Kowalski's signature UI motion principles and interface transitions. |
-| **`gsap`** | [`greensock/gsap-skills`](https://github.com/greensock/gsap-skills) | ⭐ 12k★ | Specialized guidelines for buttery smooth GreenSock web animations. |
-| **`brandkit`** | Derived from `taste-skill` | — | Dynamically generates custom branding presets, typography, and visual assets. |
-| **`stitch-skill`** | Derived from `taste-skill` | — | Google Stitch design guidelines and component patterns. |
-| **`brutalist-skill`**| Derived from `taste-skill` | — | Guides the AI in building bold, brutalist visual layouts. |
-| **`minimalist-skill`**| Derived from `taste-skill` | — | Focuses UI output on clean, minimal layouts with high contrast. |
+### 🎨 DESIGN & FRONTEND AESTHETICS (Make UIs Actually Look Good)
+| Skill / Resource | Repository / Source | Description & Capability |
+| :--- | :--- | :--- |
+| **`superdesign-skill`** | [`superdesigndev/superdesign-skill`](https://github.com/superdesigndev/superdesign-skill) | System rules and prompt heuristics for modern UI/UX superdesigns. |
+| **`better-design`** | [`marvkr/better-design`](https://github.com/marvkr/better-design) | Curated design guidelines, component best practices & anti-patterns. |
+| **`design-taste`** | [`madebymustafa/design-taste`](https://github.com/madebymustafa/design-taste) | Aesthetic rules, font pairing, color harmony and layout elevation. |
+| **`canvas-ui`** | [`DavidHDev/canvas-ui`](https://github.com/DavidHDev/canvas-ui) | Component primitives and canvas-based interactive UI elements. |
+| **`paper-shaders`** | [`paper-design/shaders`](https://github.com/paper-design/shaders) | Tactile paper-textured WebGL / GLSL shaders for modern web surfaces. |
+| **`ui-layouts`** | [`ui-layouts/uilayouts`](https://github.com/ui-layouts/uilayouts) | Collection of modern responsive UI layouts and grid structures. |
+| **`hyperiux-components`** | [`Hyperiux-Immersion-Labs/hyperiux-components`](https://github.com/Hyperiux-Immersion-Labs/hyperiux-components) | Immersive spatial UI components, glassmorphism and 3D interactions. |
+| **`motion-primitives`** | [`ibelick/motion-primitives`](https://github.com/ibelick/motion-primitives) | Advanced UI animation and motion primitives built on Framer Motion. |
+| **`cursify`** | [`ui-layouts/cursify`](https://github.com/ui-layouts/cursify) | Interactive custom cursor animations and hover effect harnesses. |
+| **`trickle-ui-kit`** | [`akaieuan/trickle-UI-kit`](https://github.com/akaieuan/trickle-UI-kit) | Lightweight, modern UI kit components and design specifications. |
+| **`ui-ux-pro-max`** | [`nextlevelbuilder/ui-ux-pro-max-skill`](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) | Palettes, typography scales, spacing heuristics, and proven design systems. |
+| **`taste-skill`** | [`leonxlnx/taste-skill`](https://github.com/leonxlnx/taste-skill) | Injects aesthetic principles to make web interfaces look bespoke and expensive. |
+| **`impeccable`** | [`pbakaus/impeccable`](https://github.com/pbakaus/impeccable) | The critical polish pass on any frontend (micro-interactions, alignment, layout). |
+| **`hyperframes`** | [`heygen-com/hyperframes`](https://github.com/heygen-com/hyperframes) | Turns web pages and UI components into motion video animations. |
+| **`emil`** | [`emilkowalski/skills`](https://github.com/emilkowalski/skills) | Emil Kowalski's signature UI motion principles and interface transitions. |
+| **`gsap`** | [`greensock/gsap-skills`](https://github.com/greensock/gsap-skills) | Specialized guidelines for buttery smooth GreenSock web animations. |
+| **`brandkit`** | Derived from `taste-skill` | Dynamically generates custom branding presets, typography, and visual assets. |
+| **`stitch-skill`** | Derived from `taste-skill` | Google Stitch design guidelines and component patterns. |
+| **`brutalist-skill`**| Derived from `taste-skill` | Guides the AI in building bold, brutalist visual layouts. |
+| **`minimalist-skill`**| Derived from `taste-skill` | Focuses UI output on clean, minimal layouts with high contrast. |
 
 ### 🔬 RESEARCH & KNOWLEDGE
 | Skill | Repository / Source | Stars | Description & Capability |

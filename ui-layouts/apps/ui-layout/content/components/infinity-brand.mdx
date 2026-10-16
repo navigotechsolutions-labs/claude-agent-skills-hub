@@ -1,0 +1,57 @@
+export const metadata = {
+  title: "CSS Infinity Brand",
+  description: "A Tailwind CSS infinity brand scroll effect component featuring continuous brand logo animations and seamless infinite scrolling. Perfect for showcasing client logos, brand partnerships, and company testimonials with smooth CSS animations.",
+  keywords: [
+    "CSS infinity brand component",
+    "Tailwind CSS infinity scroll",
+    "Infinite brand scroll",
+    "Brand logo carousel",
+    "Infinity scroll animation",
+    "Continuous brand scroll",
+    "Brand showcase component",
+    "Infinite logo animation",
+    "CSS brand slider",
+    "Tailwind infinite scroll",
+    "Brand logos infinity",
+    "Endless brand scroll",
+    "Client logos carousel",
+    "Brand animation component",
+    "Infinite brand showcase",
+    "Logo scroll animation",
+    "Continuous logo display",
+    "Brand partners scroll",
+    "Infinite carousel component",
+    "CSS infinite animation",
+    "Brand testimonials scroll",
+    "Logo infinity effect",
+    "Seamless brand scroll",
+    "Modern brand display",
+    "Responsive brand scroll",
+    "UI brand component",
+    "Custom brand carousel",
+    "React brand scroll",
+    "Brand scroll effects",
+    "Tailwind brand component"
+  ],
+};
+
+<ComponentCodePreview name='infintyband' hasReTrigger isFitheight />
+
+Add the following animations to your `global.css` file:
+
+```css global.css
+@import "tailwindcss";
+
+@theme {
+  --animate-infinite-scroll: infinite-scroll 25s linear infinite;
+
+  @keyframes infinite-scroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-100%);
+    }
+  }
+}
+```
