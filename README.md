@@ -25,29 +25,62 @@ npx claude-agent-skills-hub install taste-skill
 
 ---
 
-## 🛠️ Installed Skills Directory
+## 🛠️ Installed Skills Directory (22+ Skills Worth Adding)
 
-This hub integrates several custom skills compiled from verified community extensions and internal optimizations:
+This hub integrates top-rated community skills and behavioral harnesses for Claude Code, categorized by domain:
 
-| Custom Skill | Source / Inspiration | Description & Capability |
+### 🏗️ BUILD
+| Skill | Repository / Source | Stars | Description & Capability |
+| :--- | :--- | :---: | :--- |
+| **`superpowers`** | [`obra/superpowers`](https://github.com/obra/superpowers) | ⭐ 259k★ | Plans, specs, and debugs thoroughly before writing code. |
+| **`gstack`** | [`garrytan/gstack`](https://github.com/garrytan/gstack) | ⭐ 124k★ | Garry Tan's AI engineering team containing 23 specialized agent roles in one setup. |
+| **`caveman`** | [`JuliusBrussee/caveman`](https://github.com/JuliusBrussee/caveman) | ⭐ 92k★ | No-fluff, direct answers with zero boilerplate or padding. |
+| **`ponytail`** | [`DietrichGebert/ponytail`](https://github.com/DietrichGebert/ponytail) | ⭐ 88k★ | Replicates senior developer thinking patterns; minimal words, maximal precision. |
+| **`codex`** | [`openai/codex-plugin-cc`](https://github.com/openai/codex-plugin-cc) | ⭐ 30k★ | Runs Codex commands and code synthesis natively inside Claude Code. |
+| **`i-have-adhd`** | [`ayghri/i-have-adhd`](https://github.com/ayghri/i-have-adhd) | ⭐ 9k★ | Stops Claude from burying key answers under paragraphs of explanation. |
+
+### 🎨 DESIGN
+| Skill | Repository / Source | Stars | Description & Capability |
+| :--- | :--- | :---: | :--- |
+| **`ui-ux-pro-max`** | [`nextlevelbuilder/ui-ux-pro-max-skill`](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) | ⭐ 109k★ | Palettes, typography scales, spacing heuristics, and proven design systems. |
+| **`taste-skill`** | [`leonxlnx/taste-skill`](https://github.com/leonxlnx/taste-skill) | ⭐ 66k★ | Injects aesthetic principles to make web interfaces look bespoke and expensive. |
+| **`impeccable`** | [`pbakaus/impeccable`](https://github.com/pbakaus/impeccable) | ⭐ 49k★ | The critical polish pass on any frontend (micro-interactions, alignment, layout). |
+| **`hyperframes`** | [`heygen-com/hyperframes`](https://github.com/heygen-com/hyperframes) | ⭐ 37k★ | Turns web pages and UI components into motion video animations. |
+| **`emil`** | [`emilkowalski/skills`](https://github.com/emilkowalski/skills) | ⭐ 20k★ | Emil Kowalski's signature UI motion principles and interface transitions. |
+| **`gsap`** | [`greensock/gsap-skills`](https://github.com/greensock/gsap-skills) | ⭐ 12k★ | Specialized guidelines for buttery smooth GreenSock web animations. |
+| **`brandkit`** | Derived from `taste-skill` | — | Dynamically generates custom branding presets, typography, and visual assets. |
+| **`stitch-skill`** | Derived from `taste-skill` | — | Google Stitch design guidelines and component patterns. |
+| **`brutalist-skill`**| Derived from `taste-skill` | — | Guides the AI in building bold, brutalist visual layouts. |
+| **`minimalist-skill`**| Derived from `taste-skill` | — | Focuses UI output on clean, minimal layouts with high contrast. |
+
+### 🔬 RESEARCH & KNOWLEDGE
+| Skill | Repository / Source | Stars | Description & Capability |
+| :--- | :--- | :---: | :--- |
+| **`skill-creator`** | [`anthropics/skills`](https://github.com/anthropics/skills) | ⭐ 163k★ | Official Anthropic skill for crafting and testing custom Claude skills. |
+| **`graphify`** | [`Graphify-Labs/graphify`](https://github.com/Graphify-Labs/graphify) | ⭐ 94k★ | Converts complex documentation and notes into connected visual knowledge maps. |
+| **`last30days`** | [`mvanhorn/last30days-skill`](https://github.com/mvanhorn/last30days-skill) | ⭐ 53k★ | Scopes Reddit, X, YouTube, and HackerNews for recent technology shifts. |
+| **`agent-browser`** | [`vercel-labs/agent-browser`](https://github.com/vercel-labs/agent-browser) | ⭐ 39k★ | Equips Claude Code with full headless browser automation to navigate any website. |
+| **`find-skills`** | [`vercel-labs/skills`](https://github.com/vercel-labs/skills) | ⭐ 27k★ | Automatically discovers and installs relevant skills on demand. |
+| **`claude-hud`** | [`jarrodwatts/claude-hud`](https://github.com/jarrodwatts/claude-hud) | ⭐ 27k★ | Live heads-up display overlay showing Claude's background tasks in real time. |
+| **`notebooklm-py`** | [`teng-lin/notebooklm-py`](https://github.com/teng-lin/notebooklm-py) | — | Python integrations for managing research notebooks and context. |
+| **`obsidian-skills`**| [`kepano/obsidian-skills`](https://github.com/kepano/obsidian-skills) | — | Obsidian note linking, markdown styling, and CLI command automations. |
+| **`json-canvas`** | Derived from `obsidian-skills` | — | Reads and outputs the Obsidian infinite JSON Canvas format. |
+
+### 📢 MARKETING & CONTENT
+| Skill | Repository / Source | Stars | Description & Capability |
+| :--- | :--- | :---: | :--- |
+| **`remotion`** | [`remotion-dev/skills`](https://github.com/remotion-dev/skills) | ⭐ 54k★ | Programmatic video generation and animated clips in React. |
+| **`marketingskills`**| [`coreyhaines31/marketingskills`](https://github.com/coreyhaines31/marketingskills) | ⭐ 41k★ | 40+ specialized marketing and copywriting skills in one integrated pack. |
+| **`humanizer`** | [`blader/humanizer`](https://github.com/blader/humanizer) | ⭐ 31k★ | Strips typical AI tells, cliches, and repetitive formatting from your writing. |
+| **`social-media-skills`**| [`charlie947/social-media-skills`](https://github.com/charlie947/social-media-skills) | — | High-engagement organic social content pack. |
+
+### ⚡ SPECIALTY & INTELLIGENCE
+| Skill | Repository / Source | Description & Capability |
 | :--- | :--- | :--- |
-| **`taste-skill`** | `leonxlnx/taste-skill` | Injects aesthetic principles, helping the AI make premium design decisions. |
-| **`impeccable`** | `pbakaus/impeccable` | Structured design language specifications and layout harnesses. |
-| **`ponytail`** | `DietrichGebert/ponytail` | Prompts replicating senior developer thinking patterns, simplifying code. |
-| **`notebooklm-py`** | `teng-lin/notebooklm-py` | Python integrations for managing research notebooks and context. |
-| **`npxskillui`** | `amaancoderx/npxskillui` | Generates interactive and functional local user interfaces via NPX. |
-| **`webgpu-threejs-tsl`** | `dgreenheck/webgpu-claude-skill` | Specialized knowledge base for WebGPU, Three.js, and TSL shader code. |
-| **`ui-ux-pro-max-skill`** | `nextlevelbuilder/ui-ux-pro-max` | Injects advanced UI/UX heuristics and design system rules. |
-| **`last30days`** | `mvanhorn/last30days-skill` | Scopes Reddit, X, YouTube, and HackerNews for recent technology shifts. |
-| **`obsidian-skills`** | `kepano/obsidian-skills` | Obsidian note linking, markdown styling, and CLI command automations. |
-| **`brandkit`** | Derived from `taste-skill` | Dynamically generates custom branding presets and visual assets. |
-| **`stitch-skill`** | Derived from `taste-skill` | Integrates Google Stitch design guidelines and component patterns. |
-| **`brutalist-skill`** | Derived from `taste-skill` | Guides the AI in building bold, brutalist visual layouts. |
-| **`minimalist-skill`** | Derived from `taste-skill` | Focuses UI output on clean, minimal layouts with high contrast. |
-| **`json-canvas`** | Derived from `obsidian-skills` | Encodes skills to read and output the Obsidian infinite JSON Canvas format. |
+| **`webgpu-threejs-tsl`** | [`dgreenheck/webgpu-claude-skill`](https://github.com/dgreenheck/webgpu-claude-skill) | Specialized knowledge base for WebGPU, Three.js, and TSL shader code. |
+| **`llm-council`** | [`tenfoldmarc/llm-council-skill`](https://github.com/tenfoldmarc/llm-council-skill) | Five AI advisors debate your question, peer-review each other, and render a verdict. |
 | **`defuddle`** | Derived from `obsidian-skills` | Simplifies bloated code blocks and clarifies complex logic structures. |
-| **`llm-council`** | `tenfoldmarc/llm-council-skill` | Five AI advisors debate your question, peer-review each other anonymously, and hand you a verdict. |
-| **`gstack`** | `garrytan/gstack` | Garry Tan's AI engineering team containing 23+ specialized agent roles. |
+| **`npxskillui`** | [`amaancoderx/npxskillui`](https://github.com/amaancoderx/npxskillui) | Generates interactive and functional local user interfaces via NPX. |
 
 ---
 

@@ -6,23 +6,48 @@ const path = require('path');
 const rootDir = path.resolve(__dirname, '..');
 
 const SKILLS = [
-  { name: 'taste-skill', desc: 'Injects aesthetic design principles & layout decisions', dir: 'taste-skill' },
-  { name: 'impeccable', desc: 'Structured design language specifications & harnesses', dir: 'impeccable' },
-  { name: 'ponytail', desc: 'Replicates senior developer thinking patterns to simplify code', dir: 'ponytail' },
-  { name: 'notebooklm-py', desc: 'Python integrations for managing research notebooks', dir: 'notebooklm-py' },
-  { name: 'npxskillui', desc: 'Interactive and functional local user interfaces via NPX', dir: 'npxskillui' },
-  { name: 'webgpu-threejs-tsl', desc: 'Specialized knowledge base for WebGPU, Three.js & TSL shaders', dir: 'webgpu-threejs-tsl' },
-  { name: 'ui-ux-pro-max-skill', desc: 'Advanced UI/UX heuristics and design system rules', dir: 'ui-ux-pro-max-skill' },
-  { name: 'last30days', desc: 'Scopes Reddit, X, YouTube, HN for recent tech shifts', dir: 'last30days' },
-  { name: 'obsidian-skills', desc: 'Obsidian note linking, markdown styling & CLI automation', dir: 'obsidian-cli' },
-  { name: 'brandkit', desc: 'Dynamically generates custom branding presets & visual assets', dir: 'brandkit' },
-  { name: 'stitch-skill', desc: 'Google Stitch design guidelines & component patterns', dir: 'stitch-skill' },
-  { name: 'brutalist-skill', desc: 'Guides AI in building bold, brutalist visual layouts', dir: 'brutalist-skill' },
-  { name: 'minimalist-skill', desc: 'Clean, minimal layouts with high contrast typography', dir: 'minimalist-skill' },
-  { name: 'json-canvas', desc: 'Encodes skills to read/output Obsidian JSON Canvas format', dir: 'json-canvas' },
-  { name: 'defuddle', desc: 'Simplifies bloated code blocks and clarifies complex logic', dir: 'defuddle' },
-  { name: 'llm-council', desc: 'Five AI advisors debate, peer-review & provide verdicts', dir: 'llm-council' },
-  { name: 'gstack', desc: 'AI engineering team containing 23+ specialized agent roles', dir: 'gstack' }
+  // BUILD
+  { name: 'superpowers', group: 'BUILD', desc: 'Plans and debugs thoroughly before it writes code', dir: 'superpowers' },
+  { name: 'gstack', group: 'BUILD', desc: 'Garry Tan AI engineering team with 23+ specialized agent roles', dir: 'gstack' },
+  { name: 'caveman', group: 'BUILD', desc: 'No-fluff, direct answers with zero boilerplate or padding', dir: 'caveman' },
+  { name: 'ponytail', group: 'BUILD', desc: 'Replicates senior developer thinking patterns, simplifying code', dir: 'ponytail' },
+  { name: 'codex', group: 'BUILD', desc: 'Runs Codex commands and synthesis inside Claude Code', dir: 'codex' },
+  { name: 'i-have-adhd', group: 'BUILD', desc: 'Stops Claude from burying key answers under paragraphs', dir: 'i-have-adhd' },
+
+  // DESIGN
+  { name: 'ui-ux-pro-max', group: 'DESIGN', desc: 'Palettes, typography scales, spacing heuristics & UI design rules', dir: 'ui-ux-pro-max' },
+  { name: 'taste-skill', group: 'DESIGN', desc: 'Injects aesthetic design principles & layout decisions', dir: 'taste-skill' },
+  { name: 'impeccable', group: 'DESIGN', desc: 'Structured design language specifications & harnesses', dir: 'impeccable' },
+  { name: 'hyperframes', group: 'DESIGN', desc: 'Turns web pages and UI components into video animations', dir: 'hyperframes' },
+  { name: 'emil', group: 'DESIGN', desc: 'Signature UI motion principles and interface transitions', dir: 'emil' },
+  { name: 'gsap', group: 'DESIGN', desc: 'Specialized guidelines for smooth GreenSock web animations', dir: 'gsap' },
+  { name: 'brandkit', group: 'DESIGN', desc: 'Dynamically generates custom branding presets & visual assets', dir: 'brandkit' },
+  { name: 'stitch-skill', group: 'DESIGN', desc: 'Google Stitch design guidelines & component patterns', dir: 'stitch-skill' },
+  { name: 'brutalist-skill', group: 'DESIGN', desc: 'Guides AI in building bold, brutalist visual layouts', dir: 'brutalist-skill' },
+  { name: 'minimalist-skill', group: 'DESIGN', desc: 'Clean, minimal layouts with high contrast typography', dir: 'minimalist-skill' },
+
+  // RESEARCH
+  { name: 'skill-creator', group: 'RESEARCH', desc: 'Official Anthropic skill for crafting and testing custom skills', dir: 'skill-creator' },
+  { name: 'graphify', group: 'RESEARCH', desc: 'Converts documentation and notes into visual knowledge maps', dir: 'graphify' },
+  { name: 'last30days', group: 'RESEARCH', desc: 'Scopes Reddit, X, YouTube, HN for recent tech shifts', dir: 'last30days' },
+  { name: 'agent-browser', group: 'RESEARCH', desc: 'Lets Claude navigate and interact with any website headlessly', dir: 'agent-browser' },
+  { name: 'find-skills', group: 'RESEARCH', desc: 'Finds and auto-discovers skills for any development task', dir: 'find-skills' },
+  { name: 'claude-hud', group: 'RESEARCH', desc: 'Heads-up display showing Claude tasks and status in real time', dir: 'claude-hud' },
+  { name: 'notebooklm-py', group: 'RESEARCH', desc: 'Python integrations for managing research notebooks', dir: 'notebooklm-py' },
+  { name: 'obsidian-skills', group: 'RESEARCH', desc: 'Obsidian note linking, markdown styling & CLI automation', dir: 'obsidian-cli' },
+  { name: 'json-canvas', group: 'RESEARCH', desc: 'Encodes skills to read/output Obsidian JSON Canvas format', dir: 'json-canvas' },
+
+  // MARKETING
+  { name: 'remotion', group: 'MARKETING', desc: 'Build full programmatic motion videos in React', dir: 'remotion' },
+  { name: 'marketingskills', group: 'MARKETING', desc: '40+ specialized marketing and copywriting skills in one pack', dir: 'marketingskills' },
+  { name: 'humanizer', group: 'MARKETING', desc: 'Strips AI tells, cliches, and robotic padding from text', dir: 'humanizer' },
+  { name: 'social-media-skills', group: 'MARKETING', desc: 'High-engagement organic social media content pack', dir: 'social-media-skills' },
+
+  // SPECIALTY
+  { name: 'webgpu-threejs-tsl', group: 'SPECIALTY', desc: 'Specialized knowledge base for WebGPU, Three.js & TSL shaders', dir: 'webgpu-threejs-tsl' },
+  { name: 'llm-council', group: 'SPECIALTY', desc: 'Five AI advisors debate, peer-review & provide verdicts', dir: 'llm-council' },
+  { name: 'defuddle', group: 'SPECIALTY', desc: 'Simplifies bloated code blocks and clarifies complex logic', dir: 'defuddle' },
+  { name: 'npxskillui', group: 'SPECIALTY', desc: 'Interactive and functional local user interfaces via NPX', dir: 'npxskillui' }
 ];
 
 function printBanner() {
@@ -33,7 +58,7 @@ function printBanner() {
   ██║     ██║     ██╔══██║██║   ██║██║  ██║██╔══╝  
   ╚██████╗███████╗██║  ██║╚██████╔╝██████╔╝███████╗
    ╚═════╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝
-   Claude Agent Skills Hub (v1.1.0)
+   Claude Agent Skills Hub (v1.2.0)
   ` + '\x1b[0m');
   console.log('\x1b[36mOpen-source skills, prompt harnesses & MCP catalog for Claude Code\x1b[0m\n');
 }
@@ -60,11 +85,31 @@ Examples:
 
 function listSkills() {
   printBanner();
-  console.log('\x1b[1mAvailable Skills in Hub:\x1b[0m\n');
-  SKILLS.forEach((s, idx) => {
-    console.log(`  \x1b[32m${(idx + 1).toString().padStart(2, ' ')}. ${s.name.padEnd(24)}\x1b[0m : ${s.desc}`);
+  console.log('\x1b[1mAvailable Skills in Hub (Grouped by Category):\x1b[0m\n');
+
+  const groups = ['BUILD', 'DESIGN', 'RESEARCH', 'MARKETING', 'SPECIALTY'];
+  const groupIcons = {
+    'BUILD': '🏗️  BUILD',
+    'DESIGN': '🎨  DESIGN',
+    'RESEARCH': '🔬  RESEARCH & KNOWLEDGE',
+    'MARKETING': '📢  MARKETING & CONTENT',
+    'SPECIALTY': '⚡  SPECIALTY & INTELLIGENCE'
+  };
+
+  let count = 1;
+  groups.forEach(g => {
+    const matching = SKILLS.filter(s => s.group === g);
+    if (matching.length > 0) {
+      console.log(`\x1b[33m--- ${groupIcons[g] || g} ---\x1b[0m`);
+      matching.forEach(s => {
+        console.log(`  \x1b[32m${count.toString().padStart(2, ' ')}. ${s.name.padEnd(22)}\x1b[0m : ${s.desc}`);
+        count++;
+      });
+      console.log('');
+    }
   });
-  console.log(`\n\x1b[90mTip: Run 'npx claude-agent-skills-hub info <name>' for full details.\x1b[0m\n`);
+
+  console.log(`\x1b[90mTip: Run 'npx claude-agent-skills-hub info <name>' or 'install <name>'.\x1b[0m\n`);
 }
 
 function showSkillInfo(name) {
