@@ -15,6 +15,7 @@ const SKILLS = [
   { name: 'i-have-adhd', group: 'BUILD', desc: 'Stops Claude from burying key answers under paragraphs', dir: 'i-have-adhd' },
 
   // DESIGN & FRONTEND AESTHETICS
+  { name: 'ui-ux-design-patterns', group: 'DESIGN', desc: 'Real-world screen flows & heuristics from Mobbin, Refero, 60fps & CollectUI', dir: 'ui-ux-design-patterns' },
   { name: 'superdesign-skill', group: 'DESIGN', desc: 'System rules and prompt heuristics for modern UI/UX superdesigns', dir: 'superdesign-skill' },
   { name: 'better-design', group: 'DESIGN', desc: 'Curated design guidelines, component best practices & anti-patterns', dir: 'better-design' },
   { name: 'design-taste', group: 'DESIGN', desc: 'Aesthetic rules, font pairing, color harmony and layout elevation', dir: 'design-taste' },

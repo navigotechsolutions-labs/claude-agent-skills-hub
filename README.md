@@ -42,6 +42,7 @@ This hub integrates top-rated community skills and behavioral harnesses for Clau
 ### 🎨 DESIGN & FRONTEND AESTHETICS (Make UIs Actually Look Good)
 | Skill / Resource | Repository / Source | Description & Capability |
 | :--- | :--- | :--- |
+| **`ui-ux-design-patterns`** | [`ui-ux-design-patterns`](ui-ux-design-patterns) | **Real-world screen flows & heuristics** distilled from Mobbin, Refero, Page Flows, 60fps, Collect UI, Appshots & Pttrns. |
 | **`superdesign-skill`** | [`superdesigndev/superdesign-skill`](https://github.com/superdesigndev/superdesign-skill) | System rules and prompt heuristics for modern UI/UX superdesigns. |
 | **`better-design`** | [`marvkr/better-design`](https://github.com/marvkr/better-design) | Curated design guidelines, component best practices & anti-patterns. |
 | **`design-taste`** | [`madebymustafa/design-taste`](https://github.com/madebymustafa/design-taste) | Aesthetic rules, font pairing, color harmony and layout elevation. |

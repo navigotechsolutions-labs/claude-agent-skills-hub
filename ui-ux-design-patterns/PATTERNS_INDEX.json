@@ -1,0 +1,38 @@
+{
+  "name": "ui-ux-design-patterns",
+  "version": "1.0.0",
+  "platforms": [
+    { "name": "Mobbin", "url": "https://mobbin.com", "category": "Mobile & Web Screen Flows" },
+    { "name": "Refero", "url": "https://refero.design", "category": "SaaS & Web UI" },
+    { "name": "Appshots", "url": "https://appshots.design", "category": "Mobile App Inspiration" },
+    { "name": "60fps", "url": "https://60fps.design", "category": "Micro-Animations & Physics" },
+    { "name": "UI Sources", "url": "https://screensdesign.com", "category": "Growth Loops & Onboarding" },
+    { "name": "Chamjo", "url": "https://chamjo.design", "category": "High-Density UX & Global Reference" },
+    { "name": "Page Flows", "url": "https://pageflows.com", "category": "Video User Flow Teardowns" },
+    { "name": "Appllama", "url": "https://appllama.io", "category": "Mobile UI Breakdowns" },
+    { "name": "Asoinspo", "url": "https://asoinspo.com", "category": "Paywalls & Store Graphics" },
+    { "name": "Collect UI", "url": "https://collectui.com", "category": "Daily Component Inspiration" },
+    { "name": "Spottedinprod", "url": "https://spottedinprod.com", "category": "Clever Production UX Details" },
+    { "name": "Pttrns", "url": "https://pttrns.com", "category": "Classic Mobile Interaction Patterns" }
+  ],
+  "flows": [
+    "onboarding",
+    "authentication-otp",
+    "pricing-paywall",
+    "saas-dashboard",
+    "settings-account",
+    "search-command-k",
+    "checkout-cart",
+    "empty-states"
+  ],
+  "components": [
+    "bento-grid",
+    "kpi-metric-cards",
+    "floating-dock",
+    "bottom-sheet",
+    "segmented-stepper",
+    "data-table-sticky",
+    "toast-sonner",
+    "pricing-switch-toggle"
+  ]
+}
